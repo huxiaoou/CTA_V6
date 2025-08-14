@@ -149,43 +149,43 @@ if __name__ == "__main__":
             )
             test_returns_avlb.main(bgn_date, stp_date, calendar)
 
-    # elif args.switch == "factor":
-    #     from solutions.factor import CFactorsAvlb, pick_factor
-    #     from husfort.qinstruments import CInstruMgr
-    #
-    #     instru_mgr = CInstruMgr(instru_info_path=proj_cfg.instru_info_path, key="tushareId")
-    #     cfg, fac = pick_factor(
-    #         fclass=args.fclass,
-    #         cfg_factors=cfg_factors,
-    #         factors_by_instru_dir=proj_cfg.factors_by_instru_dir,
-    #         universe=proj_cfg.universe,
-    #         preprocess=db_struct_cfg.preprocess,
-    #         minute_bar=db_struct_cfg.minute_bar,
-    #         db_struct_pos=db_struct_cfg.position,
-    #         db_struct_forex=db_struct_cfg.forex,
-    #         db_struct_macro=db_struct_cfg.macro,
-    #         db_struct_mkt=db_struct_mkt,
-    #         instru_mgr=instru_mgr,
-    #     )
-    #     fac.main(
-    #         bgn_date=bgn_date, stp_date=stp_date, calendar=calendar,
-    #         call_multiprocess=not args.nomp, processes=args.processes,
-    #     )
-    #     fac_avlb = CFactorsAvlb(
-    #         factor_grp=cfg,
-    #         universe=proj_cfg.universe,
-    #         factors_by_instru_dir=proj_cfg.factors_by_instru_dir,
-    #         factors_avlb_raw_dir=proj_cfg.factors_avlb_raw_dir,
-    #         factors_avlb_ma_dir=proj_cfg.factors_avlb_ma_dir,
-    #         db_struct_avlb=db_struct_avlb,
-    #     )
-    #     fac_avlb.main(bgn_date, stp_date, calendar)
+    elif args.switch == "factor":
+        from solutions.factor import CFactorsAvlb, pick_factor
+        from husfort.qinstruments import CInstruMgr
+
+        instru_mgr = CInstruMgr(instru_info_path=proj_cfg.instru_info_path, key="tushareId")
+        cfg, fac = pick_factor(
+            fclass=args.fclass,
+            cfg_factors=cfg_factors,
+            factors_by_instru_dir=proj_cfg.factors_by_instru_dir,
+            universe=proj_cfg.universe,
+            preprocess=db_struct_cfg.preprocess,
+            minute_bar=db_struct_cfg.minute_bar,
+            db_struct_pos=db_struct_cfg.position,
+            db_struct_forex=db_struct_cfg.forex,
+            db_struct_macro=db_struct_cfg.macro,
+            db_struct_mkt=db_struct_mkt,
+            instru_mgr=instru_mgr,
+        )
+        fac.main(
+            bgn_date=bgn_date, stp_date=stp_date, calendar=calendar,
+            call_multiprocess=not args.nomp, processes=args.processes,
+        )
+        fac_avlb = CFactorsAvlb(
+            factor_grp=cfg,
+            universe=proj_cfg.universe,
+            factors_by_instru_dir=proj_cfg.factors_by_instru_dir,
+            factors_avlb_raw_dir=proj_cfg.factors_avlb_raw_dir,
+            factors_avlb_ewa_dir=proj_cfg.factors_avlb_ewa_dir,
+            db_struct_avlb=db_struct_avlb,
+        )
+        fac_avlb.main(bgn_date, stp_date, calendar)
     # elif args.switch == "ic":
     #     from solutions.ic_tests import main_ic_tests, TICTestAuxArgs
     #
     #     factor_grp = cfg_factors.get_cfg(factor_class=args.fclass)
     #     aux_args_list: list[TICTestAuxArgs] = [
-    #         (proj_cfg.factors_avlb_ma_dir, proj_cfg.test_returns_va_avlb_raw_dir)
+    #         (proj_cfg.factors_avlb_ewa_dir, proj_cfg.test_returns_va_avlb_raw_dir)
     #     ]
     #     main_ic_tests(
     #         rets=proj_cfg.ic_rets,
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     #
     #     factor_grp = cfg_factors.get_cfg(factor_class=args.fclass)
     #     aux_args_list: list[TVTTestAuxArgs] = [
-    #         (proj_cfg.factors_avlb_ma_dir, proj_cfg.test_returns_avlb_raw_dir)
+    #         (proj_cfg.factors_avlb_ewa_dir, proj_cfg.test_returns_avlb_raw_dir)
     #     ]
     #     main_vt_tests(
     #         rets=proj_cfg.ic_rets,
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     #         mclrn_tests_config_file=proj_cfg.mclrn_tests_config_file,
     #         factors_universe_options=proj_cfg.factors_universe_options,
     #         universe=proj_cfg.universe,
-    #         factors_avlb_ma_dir=proj_cfg.factors_avlb_ma_dir,
+    #         factors_avlb_ewa_dir=proj_cfg.factors_avlb_ewa_dir,
     #         test_returns_avlb_raw_dir=proj_cfg.test_returns_va_avlb_raw_dir,
     #     )
     #     elif args.switch == "signals":
@@ -301,7 +301,7 @@ if __name__ == "__main__":
     #         factors_corr_dir=proj_cfg.factors_corr_dir,
     #     )
     #     cal_corr_2f(
-    #         f0=f0, f1=f1, factors_avlb_dir=proj_cfg.factors_avlb_ma_dir,
+    #         f0=f0, f1=f1, factors_avlb_dir=proj_cfg.factors_avlb_ewa_dir,
     #         bgn_date=bgn_date, stp_date=stp_date,
     #         factors_corr_dir=proj_cfg.factors_corr_dir,
     #     )

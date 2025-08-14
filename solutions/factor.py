@@ -257,13 +257,13 @@ class CFactorsAvlb(_CFactorsByInstruDbOperator):
             universe: TUniverse,
             factors_by_instru_dir: str,
             factors_avlb_raw_dir: str,
-            factors_avlb_ma_dir: str,
+            factors_avlb_ewa_dir: str,
             db_struct_avlb: CDbStruct,
     ):
         super().__init__(factor_grp, factors_by_instru_dir)
         self.universe = universe
         self.factors_avlb_raw_dir = factors_avlb_raw_dir
-        self.factors_avlb_ma_dir = factors_avlb_ma_dir
+        self.factors_avlb_ewa_dir = factors_avlb_ewa_dir
         self.db_struct_avlb = db_struct_avlb
 
     def load_ref_fac(self, bgn_date: str, stp_date: str, calendar: CCalendar) -> pd.DataFrame:
@@ -354,11 +354,11 @@ class CFactorsAvlb(_CFactorsByInstruDbOperator):
             raise ValueError(f"len of raw data = {l0}  != len of neu data = {l1}.")
         return avlb_o_data
 
-    def save(self, new_data: pd.DataFrame, calendar: CCalendar, save_type: Literal["raw", "ma"]):
+    def save(self, new_data: pd.DataFrame, calendar: CCalendar, save_type: Literal["raw", "ewa"]):
         if save_type == "raw":
             factors_avlb_dir = self.factors_avlb_raw_dir
-        elif save_type == "ma":
-            factors_avlb_dir = self.factors_avlb_ma_dir
+        elif save_type == "ewa":
+            factors_avlb_dir = self.factors_avlb_ewa_dir
         else:
             raise ValueError(f"Invalid save_type {save_type}")
         db_struct_fac = gen_factors_avlb_db(
@@ -401,7 +401,7 @@ class CFactorsAvlb(_CFactorsByInstruDbOperator):
         logger.info(f"Moving average available factor {SFG(self.factor_grp.factor_class)}")
         fac_avlb_ma_data = self.moving_average(fac_avlb_nrm_data)
         save_avlb_ma_data = fac_avlb_ma_data.query(f"trade_date >= '{bgn_date}'")
-        self.save(save_avlb_ma_data, calendar, save_type="ma")
+        self.save(save_avlb_ma_data, calendar, save_type="ewa")
 
         logger.info(f"All done for factor {SFG(self.factor_grp.factor_class)}")
         return 0

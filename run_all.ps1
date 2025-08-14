@@ -12,25 +12,25 @@ python main.py --bgn $bgn_date_avlb --stp $stp_date css
 python main.py --bgn $bgn_date_avlb --stp $stp_date market
 python main.py --bgn $bgn_date_avlb --stp $stp_date test_return
 
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass BASIS
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass TS
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass RS
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass MTM
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass SKEW
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass KURT
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass LIQUIDITY
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass SIZE
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass CTP
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass CVP
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass MPH
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass VAL
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass ACR
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass REOC
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass NPLS
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass VENTROPY
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass AMP
-#python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass LCVR
-#
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass BASIS
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass TS
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass RS
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass MTM
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass SKEW
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass KURT
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass LIQUIDITY
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass SIZE
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass CTP
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass CVP
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass MPH
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass VAL
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass ACR
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass REOC
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass NPLS
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass VENTROPY
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass AMP
+python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass LCVR
+
 #python main.py --bgn $bgn_date --stp $stp_date ic --fclass BASIS
 #python main.py --bgn $bgn_date --stp $stp_date ic --fclass TS
 #python main.py --bgn $bgn_date --stp $stp_date ic --fclass RS

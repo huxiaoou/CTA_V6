@@ -1,4 +1,6 @@
 import argparse
+from threading import main_thread
+
 from solutions.factor import CCfgFactors
 
 
@@ -58,7 +60,8 @@ def parse_args(cfg_facs: CCfgFactors):
     )
 
     # switch: signals
-    arg_parser_subs.add_parser(name="signals", help="Calculate signals for factors, strategies, or portfolios")
+    arg_parser_sub = arg_parser_subs.add_parser(
+        name="signals", help="Calculate signals for factors, strategies, or portfolios")
     arg_parser_sub.add_argument(
         "--type", type=str, choices=("factor", "strategy", "portfolio"),
         help="options for --type:('factor', 'strategy', 'portfolio')",
@@ -180,39 +183,25 @@ if __name__ == "__main__":
             db_struct_avlb=db_struct_avlb,
         )
         fac_avlb.main(bgn_date, stp_date, calendar)
-    # elif args.switch == "ic":
-    #     from solutions.ic_tests import main_ic_tests, TICTestAuxArgs
-    #
-    #     factor_grp = cfg_factors.get_cfg(factor_class=args.fclass)
-    #     aux_args_list: list[TICTestAuxArgs] = [
-    #         (proj_cfg.factors_avlb_ewa_dir, proj_cfg.test_returns_va_avlb_raw_dir)
-    #     ]
-    #     main_ic_tests(
-    #         rets=proj_cfg.ic_rets,
-    #         factor_grp=factor_grp,
-    #         aux_args_list=aux_args_list,
-    #         ic_tests_dir=proj_cfg.ic_tests_dir,
-    #         bgn_date=bgn_date,
-    #         stp_date=stp_date,
-    #         calendar=calendar,
-    #     )
-    # elif args.switch == "vt":
-    #     from solutions.vt_tests import main_vt_tests, TVTTestAuxArgs
-    #
-    #     factor_grp = cfg_factors.get_cfg(factor_class=args.fclass)
-    #     aux_args_list: list[TVTTestAuxArgs] = [
-    #         (proj_cfg.factors_avlb_ewa_dir, proj_cfg.test_returns_avlb_raw_dir)
-    #     ]
-    #     main_vt_tests(
-    #         rets=proj_cfg.ic_rets,
-    #         factor_grp=factor_grp,
-    #         aux_args_list=aux_args_list,
-    #         vt_tests_dir=proj_cfg.vt_tests_dir,
-    #         db_struct_avlb=db_struct_avlb,
-    #         bgn_date=bgn_date,
-    #         stp_date=stp_date,
-    #         calendar=calendar,
-    #     )
+    elif args.switch in ("ic", "vt"):
+        from solutions.qtests import main_qtests, TICTestAuxArgs
+
+        factor_grp = cfg_factors.get_cfg(factor_class=args.fclass)
+        aux_args_list: list[TICTestAuxArgs] = [
+            (proj_cfg.factors_avlb_ewa_dir, proj_cfg.test_returns_avlb_raw_dir)
+        ]
+        main_qtests(
+            rets=proj_cfg.qtest_rets,
+            factor_grp=factor_grp,
+            aux_args_list=aux_args_list,
+            tests_dir=proj_cfg.ic_tests_dir if args.switch == "ic" else proj_cfg.vt_tests_dir,
+            db_struct_avlb=db_struct_avlb,
+            bgn_date=bgn_date,
+            stp_date=stp_date,
+            calendar=calendar,
+            test_type=args.switch,
+        )
+
     # elif args.switch in ("mclrn", "signals", "simulations", "evaluations", "quick"):
     #     from solutions.mclrn_parser import gen_tests
     #

@@ -57,16 +57,3 @@ def robust_div(
         return (x / y.where(y < 0, np.nan)).fillna(nan_val)
     else:
         raise ValueError("parameter condition must be 'ne', 'ge', or 'le'.")
-
-
-def gen_exp_wgt(k: int, rate: float = 0.25) -> np.ndarray:
-    k0, d = k // 2, k % 2
-    rou = np.power(rate, 1 / (k0 - 1)) if k0 > 1 else 1
-    sgn = np.array([1] * k0 + [0] * d + [-1] * k0)
-    val = np.power(rou, list(range(k0)) + [k0] * d + list(range(k0 - 1, -1, -1)))
-    s = sgn * val
-    abs_sum = np.abs(s).sum()
-    wgt = (s / abs_sum) if abs_sum > 0 else np.zeros(k)
-    return wgt
-
-

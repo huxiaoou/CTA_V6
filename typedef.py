@@ -36,7 +36,7 @@ class CCfgAvlbUnvrs:
 @dataclass(frozen=True)
 class CCfgTst:
     wins: list[int]
-    wins_qtest: list[int]
+    wins_qtest: list[int]  # for ic and vt
 
 
 @dataclass(frozen=True)

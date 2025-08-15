@@ -1,5 +1,4 @@
 import argparse
-from threading import main_thread
 
 from solutions.factor import CCfgFactors
 
@@ -50,6 +49,10 @@ def parse_args(cfg_facs: CCfgFactors):
         help="factor class to test",
         required=True, choices=cfg_facs.classes,
     )
+    arg_parser_sub.add_argument(
+        "--va", default=False, action="store_true",
+        help="using volatility to adjust",
+    )
 
     # switch: vt
     arg_parser_sub = arg_parser_subs.add_parser(name="vt", help="Calculate vt_tests")
@@ -57,6 +60,10 @@ def parse_args(cfg_facs: CCfgFactors):
         "--fclass", type=str,
         help="factor class to test",
         required=True, choices=cfg_facs.classes,
+    )
+    arg_parser_sub.add_argument(
+        "--va", default=False, action="store_true",
+        help="using volatility to adjust",
     )
 
     # switch: signals
@@ -200,6 +207,7 @@ if __name__ == "__main__":
             stp_date=stp_date,
             calendar=calendar,
             test_type=args.switch,
+            volatility_adjusted=args.va,
         )
 
     # elif args.switch in ("mclrn", "signals", "simulations", "evaluations", "quick"):

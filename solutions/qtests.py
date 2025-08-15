@@ -12,7 +12,7 @@ from husfort.qplot import CPlotLines
 from solutions.test_return import CTestReturnLoader
 from solutions.factor import CFactorsLoader
 from solutions.shared import gen_ic_tests_db, gen_vt_tests_db
-from math_tools.weighted import gen_exp_wgt
+from math_tools.weighted import gen_exp_wgt, wic
 from typedef import TFactorsAvlbDirType, TTestReturnsAvlbDirType
 
 
@@ -25,6 +25,7 @@ class __CQTest:
             test_returns_avlb_dir: str,
             db_struct_avlb: CDbStruct,
             tests_dir: str,
+            volatility_adjusted: bool,
     ):
         self.factor_grp = factor_grp
         self.ret = ret
@@ -32,10 +33,15 @@ class __CQTest:
         self.test_returns_avlb_dir = test_returns_avlb_dir
         self.db_struct_avlb = db_struct_avlb
         self.tests_dir = tests_dir
+        self.volatility_adjusted = volatility_adjusted
 
     @property
     def save_id(self) -> str:
-        return f"{self.factor_grp.factor_class}-{self.ret.ret_name}-{self.factor_grp.decay}"
+        fix_id = f"{self.factor_grp.factor_class}-{self.ret.ret_name}-{self.factor_grp.decay}"
+        if self.volatility_adjusted:
+            return f"{fix_id}-VA"
+        else:
+            return fix_id
 
     def load_returns(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
         returns_loader = CTestReturnLoader(
@@ -161,7 +167,7 @@ class __CQTest:
         new_data = ic_data[["trade_date"] + self.factor_grp.factor_names]
         new_data = new_data.reset_index(drop=True)
         self.save(new_data, calendar)
-        logger.info(f"IC test for {SFG(self.save_id)} finished.")
+        logger.info(f"{self.__class__.__name__} for {SFG(self.save_id)} finished.")
         return 0
 
     def main_summary(self, bgn_date: str, stp_date: str):
@@ -178,7 +184,14 @@ class __CQTest:
 # ----------------------------
 class CICTest(__CQTest):
     def core(self, data: pd.DataFrame, volatility: str = "volatility") -> pd.Series:
-        s = data[self.factor_grp.factor_names].corrwith(data[self.ret.ret_name], axis=0, method="spearman")
+        if self.volatility_adjusted:
+            data[volatility] = data[volatility].fillna(data[volatility].median())
+            s = {}
+            for factor in self.factor_grp.factor_names:
+                s[factor] = wic(x=data[factor], y=data[self.ret.ret_name], w=1 / data[volatility])
+            s = pd.Series(s)
+        else:
+            s = data[self.factor_grp.factor_names].corrwith(data[self.ret.ret_name], axis=0, method="spearman")
         return s
 
     def gen_test_db_struct(self) -> CDbStruct:
@@ -187,6 +200,7 @@ class CICTest(__CQTest):
             factor_class=self.factor_grp.factor_class,
             factors=self.factor_grp.factors,
             ret=self.ret,
+            volatility_adjusted=self.volatility_adjusted,
         )
 
     def get_plot_ylim(self) -> tuple[float, float]:
@@ -224,14 +238,20 @@ class CICTest(__CQTest):
 # ----------------------------
 class CVTTest(__CQTest):
     def core(self, data: pd.DataFrame, volatility: str = "volatility") -> pd.Series:
-        data[volatility] = data[volatility].fillna(data[volatility].median())
         wgt = gen_exp_wgt(k=len(data), rate=0.25)
         s = {}
-        for factor in self.factor_grp.factor_names:
-            factor_data = data[[factor, volatility, self.ret.ret_name]].sort_values(by=factor, ascending=False)
-            w0 = wgt / factor_data[volatility]
-            w1 = w0 / w0.abs().sum()
-            s[factor] = factor_data[self.ret.ret_name] @ w1 / self.ret.win
+        if self.volatility_adjusted:
+            data[volatility] = data[volatility].fillna(data[volatility].median())
+            for factor in self.factor_grp.factor_names:
+                factor_data = data[[factor, volatility, self.ret.ret_name]].sort_values(by=factor, ascending=False)
+                w0 = wgt / factor_data[volatility]
+                w = w0 / w0.abs().sum()
+                s[factor] = factor_data[self.ret.ret_name] @ w / self.ret.win
+        else:
+            for factor in self.factor_grp.factor_names:
+                factor_data = data[[factor, self.ret.ret_name]].sort_values(by=factor, ascending=False)
+                w = wgt
+                s[factor] = factor_data[self.ret.ret_name] @ w / self.ret.win
         s = pd.Series(s)
         return s
 
@@ -241,6 +261,7 @@ class CVTTest(__CQTest):
             factor_class=self.factor_grp.factor_class,
             factors=self.factor_grp.factors,
             ret=self.ret,
+            volatility_adjusted=self.volatility_adjusted,
         )
 
     def get_plot_ylim(self) -> tuple[float, float]:
@@ -286,6 +307,7 @@ def main_qtests(
         stp_date: str,
         calendar: CCalendar,
         test_type: Literal["ic", "vt"],
+        volatility_adjusted: bool,
 ):
     if test_type == "ic":
         test_cls = CICTest
@@ -301,6 +323,7 @@ def main_qtests(
                 test_returns_avlb_dir=test_returns_avlb_dir,
                 db_struct_avlb=db_struct_avlb,
                 tests_dir=tests_dir,
+                volatility_adjusted=volatility_adjusted,
             )
             test.main(bgn_date, stp_date, calendar)
             test.main_summary(bgn_date, stp_date)

@@ -160,6 +160,7 @@ def gen_ic_tests_db(
         factor_class: TFactorClass,
         factors: TFactors,
         ret: CRet,
+        volatility_adjusted: bool,
 ) -> CDbStruct:
     """
 
@@ -167,12 +168,18 @@ def gen_ic_tests_db(
     :param factor_class:
     :param factors:
     :param ret:
+    :param volatility_adjusted:
     :return:
     """
 
+    if volatility_adjusted:
+        db_name = f"{factor_class}-{ret.ret_name}-VA.db"
+    else:
+        db_name = f"{factor_class}-{ret.ret_name}.db"
+
     return CDbStruct(
         db_save_dir=os.path.join(ic_tests_dir, "data"),
-        db_name=f"{factor_class}-{ret.ret_name}.db",
+        db_name=db_name,
         table=CSqlTable(
             name="ic",
             primary_keys=[CSqlVar("trade_date", "TEXT")],
@@ -186,6 +193,7 @@ def gen_vt_tests_db(
         factor_class: TFactorClass,
         factors: TFactors,
         ret: CRet,
+        volatility_adjusted: bool,
 ) -> CDbStruct:
     """
 
@@ -193,12 +201,18 @@ def gen_vt_tests_db(
     :param factor_class:
     :param factors:
     :param ret:
+    :param volatility_adjusted:
     :return:
     """
 
+    if volatility_adjusted:
+        db_name = f"{factor_class}-{ret.ret_name}-VA.db"
+    else:
+        db_name = f"{factor_class}-{ret.ret_name}.db"
+
     return CDbStruct(
         db_save_dir=os.path.join(vt_tests_dir, "data"),
-        db_name=f"{factor_class}-{ret.ret_name}.db",
+        db_name=db_name,
         table=CSqlTable(
             name="vt",
             primary_keys=[CSqlVar("trade_date", "TEXT")],

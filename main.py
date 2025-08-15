@@ -70,7 +70,7 @@ def parse_args(cfg_facs: CCfgFactors):
     arg_parser_sub = arg_parser_subs.add_parser(
         name="signals", help="Calculate signals for factors, strategies, or portfolios")
     arg_parser_sub.add_argument(
-        "--type", type=str, choices=("factor", "strategy", "portfolio"),
+        "--type", type=str, choices=("factors", "strategies", "portfolios"),
         help="options for --type:('factor', 'strategy', 'portfolio')",
         required=True,
     )
@@ -158,7 +158,6 @@ if __name__ == "__main__":
                 db_struct_avlb=db_struct_avlb,
             )
             test_returns_avlb.main(bgn_date, stp_date, calendar)
-
     elif args.switch == "factor":
         from solutions.factor import CFactorsAvlb, pick_factor
         from husfort.qinstruments import CInstruMgr
@@ -210,41 +209,40 @@ if __name__ == "__main__":
             volatility_adjusted=args.va,
         )
 
-    # elif args.switch in ("mclrn", "signals", "simulations", "evaluations", "quick"):
-    #     from solutions.mclrn_parser import gen_tests
-    #
-    #     if args.switch == "mclrn":
-    #         from solutions.mclrn_parser import gen_configs_for_mclrn_tests
-    #
-    #         gen_configs_for_mclrn_tests(
-    #             mclrn_dir=proj_cfg.mclrn_dir,
-    #             mclrn_tests_config_file=proj_cfg.mclrn_tests_config_file,
-    #             rets=proj_cfg.mdl_rets,
-    #             test_models=proj_cfg.test_models,
-    #         )
-    #
-    #     tests = gen_tests(
-    #         mclrn_dir=proj_cfg.mclrn_dir,
-    #         mclrn_tests_config_file=proj_cfg.mclrn_tests_config_file,
-    #         factors_universe_options=proj_cfg.factors_universe_options,
-    #         universe=proj_cfg.universe,
-    #         factors_avlb_ewa_dir=proj_cfg.factors_avlb_ewa_dir,
-    #         test_returns_avlb_raw_dir=proj_cfg.test_returns_va_avlb_raw_dir,
-    #     )
-    #     elif args.switch == "signals":
-    #         from solutions.signals import main_signals
-    #
-    #         main_signals(
-    #             tests=tests,
-    #             signals_dir=proj_cfg.signals_dir,
-    #             db_struct_avlb=db_struct_avlb,
-    #             db_struct_css=db_struct_css,
-    #             bgn_date=bgn_date,
-    #             stp_date=stp_date,
-    #             calendar=calendar,
-    #             call_multiprocess=not args.nomp,
-    #             processes=args.processes,
-    #         )
+    if args.switch == "signals":
+        if args.type == "factors":
+            from solutions.signals import gen_signals_from_factors, main_signals
+
+            signals = gen_signals_from_factors(
+                factor_cfgs=cfg_factors.get_cfgs(),
+                factors_avlb_dir=proj_cfg.factors_avlb_ewa_dir,
+                signals_factors_dir=proj_cfg.signals_factors_dir,
+            )
+            main_signals(
+                signals=signals,
+                bgn_date=bgn_date,
+                stp_date=stp_date,
+                calendar=calendar,
+                call_multiprocess=not args.nomp,
+                processes=args.processes,
+                desc="Calculate signals from factors",
+            )
+        elif args.type == "strategies":
+            raise NotImplementedError
+        elif args.type == "portfolios":
+            raise NotImplementedError
+
+        # main_signals(
+        #     tests=tests,
+        #     signals_dir=proj_cfg.signals_dir,
+        #     db_struct_avlb=db_struct_avlb,
+        #     db_struct_css=db_struct_css,
+        #     bgn_date=bgn_date,
+        #     stp_date=stp_date,
+        #     calendar=calendar,
+        #     call_multiprocess=not args.nomp,
+        #     processes=args.processes,
+        # )
     #     elif args.switch == "simulations":
     #         from solutions.simulations import main_sims
     #

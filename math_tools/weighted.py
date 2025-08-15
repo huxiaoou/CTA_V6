@@ -3,6 +3,18 @@ import pandas as pd
 from typing import Union
 
 
+def map_to_weight(data: pd.DataFrame, rate: float = 0.25) -> pd.DataFrame:
+    k = len(data)
+    k0, d, r0 = k // 2, k % 2, (k + 1) / 2
+    rou = np.power(rate, 1 / (k0 - 1)) if k0 > 1 else 1
+    data_filled = data.fillna(data.median())
+    data_rnk = data_filled.rank() - r0
+    val, sgn = np.power(rou, r0 - data_rnk.abs()), np.sign(data_rnk)
+    raw_wgt = sgn * val
+    wgt = raw_wgt / raw_wgt.abs().sum()
+    return wgt
+
+
 def gen_exp_wgt(k: int, rate: float = 0.25) -> np.ndarray:
     k0, d = k // 2, k % 2
     rou = np.power(rate, 1 / (k0 - 1)) if k0 > 1 else 1

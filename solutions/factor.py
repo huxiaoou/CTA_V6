@@ -477,6 +477,9 @@ class CCfgFactors:
             fi += 1
         return r
 
+    def get_cfgs(self) -> list[CCfgFactorGrp]:
+        return [z[0] for z in self.mgr.values()]
+
     def get_cfg(self, factor_class: str) -> CCfgFactorGrp:
         return self.mgr[factor_class][0]
 

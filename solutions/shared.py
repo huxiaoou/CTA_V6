@@ -2,6 +2,7 @@ import os
 from husfort.qsqlite import CDbStruct, CSqlTable, CSqlVar
 from typedefs.typedefReturns import TReturnClass, CRet
 from typedefs.typedefFactors import TFactorClass, TFactors
+from typedefs.typedefStrategies import CStrategy
 
 
 # ----------------------------------------
@@ -217,6 +218,18 @@ def gen_vt_tests_db(
             name="vt",
             primary_keys=[CSqlVar("trade_date", "TEXT")],
             value_columns=[CSqlVar(fac.factor_name, "REAL") for fac in factors],
+        )
+    )
+
+
+def gen_optimize_db(save_dir: str, strategy: CStrategy) -> CDbStruct:
+    return CDbStruct(
+        db_save_dir=save_dir,
+        db_name=f"{strategy.name}.db",
+        table=CSqlTable(
+            name="weights",
+            primary_keys=[CSqlVar("trade_date", "TEXT")],
+            value_columns=[CSqlVar(fac.factor_name, "REAL") for fac in strategy.factors],
         )
     )
 

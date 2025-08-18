@@ -2,7 +2,6 @@ Remove-Item E:\Data\Projects\CTA_V6\* -Recurse
 
 $bgn_date_avlb = "20120104"
 $bgn_date_factor = "20140102"
-$bgn_date_mclrn = "20160129" # must be at least bgn_date_factor + max(trn_win) + max(prd_win)
 $bgn_date_sig = "20161229" # must at least 2 days ahead of bgn date
 $bgn_date = "20170103"
 $stp_date = "20250701"
@@ -70,6 +69,7 @@ python main.py --bgn $bgn_date --stp $stp_date vt --fclass AMP
 python main.py --bgn $bgn_date --stp $stp_date vt --fclass LCVR
 
 python main.py --bgn $bgn_date_sig --stp $stp_date signals --type factors
+python main.py --bgn $bgn_date_sig --stp $stp_date optimize
 #python main.py --bgn $bgn_date --stp $stp_date quick
 #python main.py --bgn $bgn_date --stp $stp_date --nomp simulations
 #python main.py --bgn $bgn_date --stp $stp_date evaluations

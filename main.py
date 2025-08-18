@@ -66,6 +66,9 @@ def parse_args(cfg_facs: CCfgFactors):
         help="using volatility to adjust",
     )
 
+    # switch: test return
+    arg_parser_subs.add_parser(name="optimize", help="Calculate optimal weights of factors in strategies")
+
     # switch: signals
     arg_parser_sub = arg_parser_subs.add_parser(
         name="signals", help="Calculate signals for factors, strategies, or portfolios")
@@ -208,8 +211,7 @@ if __name__ == "__main__":
             test_type=args.switch,
             volatility_adjusted=args.va,
         )
-
-    if args.switch == "signals":
+    elif args.switch == "signals":
         if args.type == "factors":
             from solutions.signals import gen_signals_from_factors, main_signals
 
@@ -231,6 +233,18 @@ if __name__ == "__main__":
             raise NotImplementedError
         elif args.type == "portfolios":
             raise NotImplementedError
+    elif args.switch == "optimize":
+        from solutions.optimize import main_optimize
+
+        main_optimize(
+            strategies=proj_cfg.strategies,
+            bgn_date=bgn_date,
+            stp_date=stp_date,
+            calendar=calendar,
+            method="VT",
+            optimize_dir=proj_cfg.optimize_dir,
+            vt_tests_dir=proj_cfg.vt_tests_dir,
+        )
 
         # main_signals(
         #     tests=tests,

@@ -306,20 +306,20 @@ if __name__ == "__main__":
             call_multiprocess=not args.nomp,
             processes=args.processes,
         )
-    # elif args.switch == "fcorr":
-    #     from solutions.factor import cal_corr_2f
-    #
-    #     f0, f1 = cfg_factors.match_factor(args.f0), cfg_factors.match_factor(args.f1)
-    #     cal_corr_2f(
-    #         f0=f0, f1=f1, factors_avlb_dir=proj_cfg.factors_avlb_raw_dir,
-    #         bgn_date=bgn_date, stp_date=stp_date,
-    #         factors_corr_dir=proj_cfg.factors_corr_dir,
-    #     )
-    #     cal_corr_2f(
-    #         f0=f0, f1=f1, factors_avlb_dir=proj_cfg.factors_avlb_ewa_dir,
-    #         bgn_date=bgn_date, stp_date=stp_date,
-    #         factors_corr_dir=proj_cfg.factors_corr_dir,
-    #     )
+    elif args.switch == "fcorr":
+        from solutions.factor import cal_corr_2f
+
+        f0, f1 = cfg_factors.match_factor(args.f0), cfg_factors.match_factor(args.f1)
+        cal_corr_2f(
+            f0=f0, f1=f1, factors_avlb_dir=proj_cfg.factors_avlb_raw_dir,
+            bgn_date=bgn_date, stp_date=stp_date,
+            factors_corr_dir=proj_cfg.factors_corr_dir,
+        )
+        cal_corr_2f(
+            f0=f0, f1=f1, factors_avlb_dir=proj_cfg.factors_avlb_ewa_dir,
+            bgn_date=bgn_date, stp_date=stp_date,
+            factors_corr_dir=proj_cfg.factors_corr_dir,
+        )
 
     elif args.switch == "test":
         logger.info("Do some tests")

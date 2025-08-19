@@ -548,8 +548,8 @@ def cal_corr_2f(
 ):
     if factors_avlb_dir.endswith("factors_avlb_raw"):
         raw_ma_tag = "raw"
-    elif factors_avlb_dir.endswith("factors_avlb_ma"):
-        raw_ma_tag = "ma"
+    elif factors_avlb_dir.endswith("factors_avlb_ewa"):
+        raw_ma_tag = "ema"
     else:
         raise ValueError(f"factors_avlb_dir = {factors_avlb_dir} is illegal")
     save_id = f"ic_{f0.factor_name}_{f1.factor_name}_{raw_ma_tag}"

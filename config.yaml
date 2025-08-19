@@ -299,6 +299,7 @@ factors:
 # ------- strategies -------
 strategies:
   - name: s0
+    opt_win: 20
     ret: Opn005L1
     factors:
       - [ BASIS, BASIS020 ]
@@ -321,6 +322,7 @@ strategies:
       - [ AMP, AMPDIF ]
       - [ LCVR, LCVR020 ]
   - name: s1
+    opt_win: 20
     ret: Cls005L1
     factors:
       - [ BASIS, BASIS020 ]

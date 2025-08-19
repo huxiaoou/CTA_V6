@@ -28,12 +28,10 @@ class COptimizerForStrategyReader:
 
 
 class __COptimizerForStrategy(COptimizerForStrategyReader):
-    @property
-    def opt_win(self) -> int:
-        raise NotImplementedError
+    WEEK_SPAN = 10
 
     def get_buffer_bgn_date(self, bgn_date: str, calendar: CCalendar) -> str:
-        return calendar.get_next_date(bgn_date, shift=-max(self.opt_win, 10) + 1)
+        return calendar.get_next_date(bgn_date, shift=-self.strategy.opt_win - self.WEEK_SPAN + 1)
 
     def load_input(self, bgn_date: str, stp_date: str):
         raise NotImplementedError
@@ -103,10 +101,6 @@ class __COptimizerForStrategy(COptimizerForStrategyReader):
 
 
 class COptimizerForStrategyEQ(__COptimizerForStrategy):
-    @property
-    def opt_win(self) -> int:
-        return 1
-
     def load_input(self, bgn_date: str, stp_date: str):
         pass
 
@@ -122,17 +116,11 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
             optimize_dir: str,
             vt_tests_dir: str,
             volatility_adjusted: bool,
-            opt_win: int,
     ):
         super().__init__(strategy, optimize_dir)
         self.vt_tests_dir = vt_tests_dir
         self.volatility_adjusted = volatility_adjusted
         self.vt_rets: pd.DataFrame = pd.DataFrame()
-        self._opt_win = opt_win
-
-    @property
-    def opt_win(self) -> int:
-        return self._opt_win
 
     def _load_factor_rets(self, factor: CFactor, bgn_date: str, stp_date: str) -> pd.Series:
         db_struct = gen_vt_tests_db(
@@ -168,7 +156,7 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
         return w / w.sum()
 
     def optimize_at_day(self, trade_date: str, calendar: CCalendar) -> pd.Series:
-        opt_bgn_date = calendar.get_next_date(trade_date, shift=-self._opt_win + 1)
+        opt_bgn_date = calendar.get_next_date(trade_date, shift=-self.strategy.opt_win + 1)
         opt_rets = self.vt_rets.query(f"trade_date >= '{opt_bgn_date}' and trade_date <= '{trade_date}'")
         opt_wgt = self.optimizer(rets=opt_rets)
         return opt_wgt
@@ -197,7 +185,6 @@ def main_optimize(
                 optimize_dir=optimize_dir,
                 vt_tests_dir=vt_tests_dir,
                 volatility_adjusted=False,
-                opt_win=strategy.ret.win * 10,
             )
         optimizer.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
         logger.info(f"Optimizing strategy {SFG(strategy.name)} finished.")

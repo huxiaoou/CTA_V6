@@ -4,7 +4,6 @@ from rich.progress import Progress, track
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qutility import check_and_makedirs, error_handler
-from husfort.qsimquick import CSignalsLoaderBase
 from typedefs.typedefFactors import CCfgFactorGrp, CFactor
 from typedefs.typedefStrategies import CStrategy
 from solutions.factor import CFactorsLoader
@@ -13,14 +12,10 @@ from solutions.shared import gen_sig_fac_db, gen_sig_strategy_db
 from math_tools.weighted import map_to_weight
 
 
-class CSignals(CSignalsLoaderBase):
+class CSignals:
     def __init__(self, signals_dir: str, signal_id: str):
         self.signals_dir = signals_dir
-        self._signal_id = signal_id
-
-    @property
-    def signal_id(self):
-        return self._signal_id
+        self.signal_id = signal_id
 
     def get_sig_db_struct(self) -> CDbStruct:
         raise NotImplementedError

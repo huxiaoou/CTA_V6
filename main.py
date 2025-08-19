@@ -79,10 +79,13 @@ def parse_args(cfg_facs: CCfgFactors):
     )
 
     # switch: simulations
-    arg_parser_subs.add_parser(name="simulations", help="Calculate simulations for signals")
-
-    # switch: evaluations
-    arg_parser_subs.add_parser(name="evaluations", help="Calculate evaluations for simulations")
+    arg_parser_sub = arg_parser_subs.add_parser(
+        name="simulations", help="Calculate simulations for strategies and portfolios.")
+    arg_parser_sub.add_argument(
+        "--type", type=str, choices=("strategies", "portfolios"),
+        help="options for --type:('strategies', 'portfolios')",
+        required=True,
+    )
 
     # switch: evaluations
     arg_parser_subs.add_parser(name="quick", help="Calculate quick simulations for signals")
@@ -260,34 +263,34 @@ if __name__ == "__main__":
             vt_tests_dir=proj_cfg.vt_tests_dir,
         )
 
-    #     elif args.switch == "simulations":
-    #         from solutions.simulations import main_sims
-    #
-    #         main_sims(
-    #             tests=tests,
-    #             signals_dir=proj_cfg.signals_dir,
-    #             init_cash=proj_cfg.const.INIT_CASH,
-    #             cost_rate=proj_cfg.const.COST_RATE,
-    #             instru_info_path=proj_cfg.instru_info_path,
-    #             universe=list(proj_cfg.universe),
-    #             preprocess=db_struct_cfg.preprocess,
-    #             fmd=db_struct_cfg.fmd,
-    #             bgn_date=bgn_date,
-    #             stp_date=stp_date,
-    #             calendar=calendar,
-    #             sim_save_dir=proj_cfg.simulations_dir,
-    #             call_multiprocess=not args.nomp,
-    #             processes=args.processes,
-    #             verbose=args.verbose,
-    #         )
-    #     elif args.switch == "evaluations":
-    #         from solutions.evaluations import main_evl_tests
-    #
-    #         main_evl_tests(
-    #             tests=tests,
-    #             sim_save_dir=proj_cfg.simulations_dir,
-    #             evl_save_dir=proj_cfg.evaluations_dir,
-    #         )
+    elif args.switch == "simulations":
+        from solutions.simulations import main_sims
+        from solutions.evaluations import main_evl_strategies
+
+        main_sims(
+            strategies=proj_cfg.strategies,
+            signals_strategies_dir=proj_cfg.signals_strategies_dir,
+            init_cash=proj_cfg.const.INIT_CASH,
+            cost_rate=proj_cfg.const.COST_RATE,
+            instru_info_path=proj_cfg.instru_info_path,
+            universe=list(proj_cfg.universe),
+            preprocess=db_struct_cfg.preprocess,
+            fmd=db_struct_cfg.fmd,
+            bgn_date=bgn_date,
+            stp_date=stp_date,
+            calendar=calendar,
+            sim_save_dir=proj_cfg.simulations_dir,
+            call_multiprocess=not args.nomp,
+            processes=args.processes,
+            verbose=args.verbose,
+        )
+
+        main_evl_strategies(
+            strategies=proj_cfg.strategies,
+            sim_save_dir=proj_cfg.simulations_dir,
+            evl_save_dir=proj_cfg.evaluations_dir,
+        )
+
     #     elif args.switch == "quick":
     #         from solutions.sims_quick import main_sims_quick
     #

@@ -291,21 +291,21 @@ if __name__ == "__main__":
             evl_save_dir=proj_cfg.evaluations_dir,
         )
 
-    #     elif args.switch == "quick":
-    #         from solutions.sims_quick import main_sims_quick
-    #
-    #         main_sims_quick(
-    #             tests=tests,
-    #             signals_dir=proj_cfg.signals_dir,
-    #             test_returns_avlb_raw_dir=proj_cfg.test_returns_avlb_raw_dir,
-    #             cost_rate=proj_cfg.const.COST_RATE,
-    #             sims_quick_dir=proj_cfg.sims_quick_dir,
-    #             bgn_date=bgn_date,
-    #             stp_date=stp_date,
-    #             calendar=calendar,
-    #             call_multiprocess=not args.nomp,
-    #             processes=args.processes,
-    #         )
+    elif args.switch == "quick":
+        from solutions.sims_quick import main_sims_quick
+
+        main_sims_quick(
+            strategies=proj_cfg.strategies,
+            signals_strategies_dir=proj_cfg.signals_strategies_dir,
+            test_returns_avlb_raw_dir=proj_cfg.test_returns_avlb_raw_dir,
+            cost_rate=proj_cfg.const.COST_RATE,
+            sims_quick_dir=proj_cfg.sims_quick_dir,
+            bgn_date=bgn_date,
+            stp_date=stp_date,
+            calendar=calendar,
+            call_multiprocess=not args.nomp,
+            processes=args.processes,
+        )
     # elif args.switch == "fcorr":
     #     from solutions.factor import cal_corr_2f
     #

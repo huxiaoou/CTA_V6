@@ -71,10 +71,10 @@ def parse_args(cfg_facs: CCfgFactors):
 
     # switch: signals
     arg_parser_sub = arg_parser_subs.add_parser(
-        name="signals", help="Calculate signals for factors, strategies, or portfolios")
+        name="signals", help="Calculate signals for factors or strategies.")
     arg_parser_sub.add_argument(
-        "--type", type=str, choices=("factors", "strategies", "portfolios"),
-        help="options for --type:('factor', 'strategy', 'portfolio')",
+        "--type", type=str, choices=("factors", "strategies"),
+        help="options for --type:('factors', 'strategies')",
         required=True,
     )
 
@@ -234,10 +234,6 @@ if __name__ == "__main__":
                 signals_factors_dir=proj_cfg.signals_factors_dir,
                 optimize_dir=proj_cfg.optimize_dir,
             )
-
-        elif args.type == "portfolios":
-            desc = "Calculate signals from portfolios"
-            signals = []
         else:
             raise ValueError(f"Invalid argument 'type' value: {args.type}")
 
@@ -264,17 +260,6 @@ if __name__ == "__main__":
             vt_tests_dir=proj_cfg.vt_tests_dir,
         )
 
-        # main_signals(
-        #     tests=tests,
-        #     signals_dir=proj_cfg.signals_dir,
-        #     db_struct_avlb=db_struct_avlb,
-        #     db_struct_css=db_struct_css,
-        #     bgn_date=bgn_date,
-        #     stp_date=stp_date,
-        #     calendar=calendar,
-        #     call_multiprocess=not args.nomp,
-        #     processes=args.processes,
-        # )
     #     elif args.switch == "simulations":
     #         from solutions.simulations import main_sims
     #

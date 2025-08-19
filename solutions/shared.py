@@ -246,7 +246,7 @@ def gen_sig_fac_db(save_dir: str, factor_class: TFactorClass, factors: TFactors)
     )
 
 
-def gen_sig_db(save_dir: str, save_id: str) -> CDbStruct:
+def gen_sig_strategy_db(save_dir: str, save_id: str) -> CDbStruct:
     """
 
     :param save_dir:

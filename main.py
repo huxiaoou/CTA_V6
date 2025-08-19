@@ -212,27 +212,45 @@ if __name__ == "__main__":
             volatility_adjusted=args.va,
         )
     elif args.switch == "signals":
-        if args.type == "factors":
-            from solutions.signals import gen_signals_from_factors, main_signals
+        from solutions.signals import main_signals
 
+        if args.type == "factors":
+            from solutions.signals import gen_signals_from_factors
+
+            desc = "Calculate signals from factors"
             signals = gen_signals_from_factors(
                 factor_cfgs=cfg_factors.get_cfgs(),
                 factors_avlb_dir=proj_cfg.factors_avlb_ewa_dir,
                 signals_factors_dir=proj_cfg.signals_factors_dir,
             )
-            main_signals(
-                signals=signals,
-                bgn_date=bgn_date,
-                stp_date=stp_date,
-                calendar=calendar,
-                call_multiprocess=not args.nomp,
-                processes=args.processes,
-                desc="Calculate signals from factors",
-            )
+
         elif args.type == "strategies":
-            raise NotImplementedError
+            from solutions.signals import gen_signals_from_strategies
+
+            desc = "Calculate signals from strategies"
+            signals = gen_signals_from_strategies(
+                strategies=proj_cfg.strategies,
+                signals_strategies_dir=proj_cfg.signals_strategies_dir,
+                signals_factors_dir=proj_cfg.signals_factors_dir,
+                optimize_dir=proj_cfg.optimize_dir,
+            )
+
         elif args.type == "portfolios":
-            raise NotImplementedError
+            desc = "Calculate signals from portfolios"
+            signals = []
+        else:
+            raise ValueError(f"Invalid argument 'type' value: {args.type}")
+
+        main_signals(
+            signals=signals,
+            bgn_date=bgn_date,
+            stp_date=stp_date,
+            calendar=calendar,
+            call_multiprocess=not args.nomp,
+            processes=args.processes,
+            desc=desc,
+        )
+
     elif args.switch == "optimize":
         from solutions.optimize import main_optimize
 

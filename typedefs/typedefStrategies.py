@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typedefs.typedefReturns import CRet
-from typedefs.typedefFactors import TFactors, CFactor
+from typedefs.typedefFactors import TFactors, CFactor, TFactorNames
 
 
 @dataclass
@@ -19,6 +19,10 @@ class CStrategy:
             factors=[CFactor(factor_class=c, factor_name=n)
                      for c, n in kwargs["factors"]]
         )
+
+    @property
+    def factor_names(self) -> TFactorNames:
+        return [f.factor_name for f in self.factors]
 
 
 @dataclass

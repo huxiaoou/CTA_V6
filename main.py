@@ -230,6 +230,7 @@ if __name__ == "__main__":
                 signals_strategies_dir=proj_cfg.signals_strategies_dir,
                 signals_factors_dir=proj_cfg.signals_factors_dir,
                 optimize_dir=proj_cfg.optimize_dir,
+                db_struct_css=db_struct_css,
             )
         else:
             raise ValueError(f"Invalid argument 'type' value: {args.type}")

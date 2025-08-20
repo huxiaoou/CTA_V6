@@ -3,6 +3,25 @@ import pandas as pd
 from typing import Union
 
 
+def adjust_weights(raw_weights: pd.DataFrame, tot_wgt: pd.DataFrame, weight: str = "weight") -> pd.DataFrame:
+    """
+
+    :param raw_weights: a pd.DataFrame with columns at least: ["trade_date", "weight"]
+    :param tot_wgt: a pd.DataFrame with columns at least: ["trade_date", "tot_wgt"]
+    :param weight: a str representing the raw weight to be adjusted
+    :return:
+    """
+    new_data = pd.merge(
+        left=raw_weights,
+        right=tot_wgt[["trade_date", "tot_wgt"]],
+        on="trade_date",
+        how="left",
+    )
+    new_data[weight] = new_data[weight] * new_data["tot_wgt"]
+    weights = new_data[["trade_date", "instrument", weight]]
+    return weights
+
+
 def map_to_weight(data: pd.DataFrame, rate: float = 0.25) -> pd.DataFrame:
     k = len(data)
     k0, d, r0 = k // 2, k % 2, (k + 1) / 2

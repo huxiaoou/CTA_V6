@@ -9,7 +9,7 @@ from typedefs.typedefStrategies import CStrategy
 from solutions.factor import CFactorsLoader
 from solutions.optimize import COptimizerForStrategyReader
 from solutions.shared import gen_sig_fac_db, gen_sig_strategy_db
-from math_tools.weighted import map_to_weight
+from math_tools.weighted import map_to_weight, adjust_weights
 
 
 class CSignals:
@@ -115,11 +115,13 @@ class CSignalsStrategy(CSignals):
             signals_strategies_dir: str,
             signals_factors_dir: str,
             optimize_dir: str,
+            db_struct_css: CDbStruct,
     ):
         super().__init__(signals_dir=signals_strategies_dir, signal_id=strategy.name)
         self.strategy = strategy
         self.signals_factors_dir = signals_factors_dir
         self.optimize_dir = optimize_dir
+        self.db_struct_css = db_struct_css
 
     def get_buffer_bgn_date(self, bgn_date: str, calendar: CCalendar) -> str:
         return calendar.get_next_date(bgn_date, shift=-self.strategy.ret.win + 1)
@@ -192,14 +194,26 @@ class CSignalsStrategy(CSignals):
         result = sig.reset_index()[["trade_date", "instrument", "weight"]]
         return result
 
+    def load_tot_wgt(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
+        sqldb = CMgrSqlDb(
+            db_save_dir=self.db_struct_css.db_save_dir,
+            db_name=self.db_struct_css.db_name,
+            table=self.db_struct_css.table,
+            mode="r",
+        )
+        data = sqldb.read_by_range(bgn_date, stp_date)
+        return data
+
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         buffer_bgn_date = self.get_buffer_bgn_date(bgn_date, calendar)
         signals_factors = self.load_signals_factors(buffer_bgn_date, stp_date)
         signals_ma = self.mov_ave(signals_factors)
         opt_wgt = self.load_opt_wgt_for_factors(buffer_bgn_date, stp_date)
-        strategy_wgt = self.cal_wgt_strategy(signals_ma, opt_wgt)
-        strategy_wgt = strategy_wgt.query(f"trade_date >= '{bgn_date}'")
-        self.save(strategy_wgt, calendar)
+        raw_weights = self.cal_wgt_strategy(signals_ma, opt_wgt)
+        raw_weights = raw_weights.query(f"trade_date >= '{bgn_date}'")
+        tot_wgt = self.load_tot_wgt(bgn_date, stp_date)
+        weights = adjust_weights(raw_weights, tot_wgt)
+        self.save(weights, calendar)
         return 0
 
 
@@ -261,6 +275,7 @@ def gen_signals_from_strategies(
         signals_strategies_dir: str,
         signals_factors_dir: str,
         optimize_dir: str,
+        db_struct_css: CDbStruct,
 ) -> list[CSignalsStrategy]:
     return [
         CSignalsStrategy(
@@ -268,6 +283,7 @@ def gen_signals_from_strategies(
             signals_strategies_dir=signals_strategies_dir,
             signals_factors_dir=signals_factors_dir,
             optimize_dir=optimize_dir,
+            db_struct_css=db_struct_css,
         )
         for z in strategies
     ]

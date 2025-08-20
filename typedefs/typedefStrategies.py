@@ -1,3 +1,4 @@
+import pandas as pd
 from dataclasses import dataclass
 from typedefs.typedefReturns import CRet
 from typedefs.typedefFactors import TFactors, CFactor, TFactorNames
@@ -29,3 +30,7 @@ class CStrategy:
 class CPortfolio:
     name: str
     strategies_weights: dict[str, float]
+
+    @property
+    def weight(self) -> pd.Series:
+        return pd.Series(self.strategies_weights)

@@ -266,6 +266,7 @@ if __name__ == "__main__":
     elif args.switch == "simulations":
         from solutions.simulations import main_sims
         from solutions.evaluations import main_evl_strategies
+        from solutions.portfolios import main_sims_portfolios
 
         main_sims(
             strategies=proj_cfg.strategies,
@@ -291,6 +292,13 @@ if __name__ == "__main__":
             evl_save_dir=proj_cfg.evaluations_dir,
         )
 
+        main_sims_portfolios(
+            portfolios=proj_cfg.portfolios,
+            simulations_dir=proj_cfg.simulations_dir,
+            bgn_date=bgn_date,
+            stp_date=stp_date,
+            calendar=calendar,
+        )
     elif args.switch == "quick":
         from solutions.sims_quick import main_sims_quick
 

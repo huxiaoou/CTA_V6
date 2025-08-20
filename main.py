@@ -79,13 +79,7 @@ def parse_args(cfg_facs: CCfgFactors):
     )
 
     # switch: simulations
-    arg_parser_sub = arg_parser_subs.add_parser(
-        name="simulations", help="Calculate simulations for strategies and portfolios.")
-    arg_parser_sub.add_argument(
-        "--type", type=str, choices=("strategies", "portfolios"),
-        help="options for --type:('strategies', 'portfolios')",
-        required=True,
-    )
+    arg_parser_subs.add_parser(name="simulations", help="Calculate simulations for strategies and portfolios.")
 
     # switch: evaluations
     arg_parser_subs.add_parser(name="quick", help="Calculate quick simulations for signals")
@@ -265,7 +259,7 @@ if __name__ == "__main__":
 
     elif args.switch == "simulations":
         from solutions.simulations import main_sims
-        from solutions.evaluations import main_evl_strategies
+        from solutions.evaluations import main_evl_strategies_and_portfolios
         from solutions.portfolios import main_sims_portfolios
 
         main_sims(
@@ -286,18 +280,19 @@ if __name__ == "__main__":
             verbose=args.verbose,
         )
 
-        main_evl_strategies(
-            strategies=proj_cfg.strategies,
-            sim_save_dir=proj_cfg.simulations_dir,
-            evl_save_dir=proj_cfg.evaluations_dir,
-        )
-
         main_sims_portfolios(
             portfolios=proj_cfg.portfolios,
             simulations_dir=proj_cfg.simulations_dir,
             bgn_date=bgn_date,
             stp_date=stp_date,
             calendar=calendar,
+        )
+
+        main_evl_strategies_and_portfolios(
+            strategies=proj_cfg.strategies,
+            portfolios=proj_cfg.portfolios,
+            sim_save_dir=proj_cfg.simulations_dir,
+            evl_save_dir=proj_cfg.evaluations_dir,
         )
     elif args.switch == "quick":
         from solutions.sims_quick import main_sims_quick

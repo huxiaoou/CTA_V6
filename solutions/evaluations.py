@@ -6,7 +6,7 @@ from husfort.qsqlite import CMgrSqlDb
 from husfort.qsimulation import gen_nav_db
 from husfort.qutility import check_and_makedirs
 from husfort.qplot import CPlotLines
-from typedefs.typedefStrategies import CStrategy
+from typedefs.typedefStrategies import CStrategy, CPortfolio
 
 
 def evl_sim(sim_id: str, sim_save_dir: str, evl_save_dir: str) -> dict:
@@ -54,15 +54,29 @@ def evl_sim(sim_id: str, sim_save_dir: str, evl_save_dir: str) -> dict:
     return d
 
 
-def main_evl_strategies(strategies: list[CStrategy], sim_save_dir: str, evl_save_dir: str):
+def main_evl_strategies_and_portfolios(
+        strategies: list[CStrategy],
+        portfolios: list[CPortfolio],
+        sim_save_dir: str,
+        evl_save_dir: str,
+):
     summary_all = []
     for strategy in track(strategies, description="Evaluating strategies"):
         d = evl_sim(sim_id=strategy.name, sim_save_dir=sim_save_dir, evl_save_dir=evl_save_dir)
         args_data = {
             "ret": strategy.ret.ret_name,
+            "id": strategy.name,
         }
         d.update(args_data)
         summary_all.append(d)
+    for portfolio in track(portfolios, description="Evaluating strategies"):
+        d = evl_sim(sim_id=portfolio.name, sim_save_dir=sim_save_dir, evl_save_dir=evl_save_dir)
+        args_data = {
+            "id": portfolio.name,
+        }
+        d.update(args_data)
+        summary_all.append(d)
+
     summary_all = pd.DataFrame(summary_all)
     summary_all["score"] = summary_all["score"].map(lambda _: float(_))
     summary_all.sort_values(by="score", ascending=False, inplace=True)

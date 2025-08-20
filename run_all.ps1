@@ -74,5 +74,5 @@ python main.py --bgn $bgn_date_qtest --stp $stp_date vt --fclass LCVR
 python main.py --bgn $bgn_date_sig_fac --stp $stp_date signals --type factors
 python main.py --bgn $bgn_date_opt --stp $stp_date optimize
 python main.py --bgn $bgn_date_sig_stg --stp $stp_date signals --type strategies
-python main.py --bgn $bgn_date --stp $stp_date --nomp simulations --type strategies
+python main.py --bgn $bgn_date --stp $stp_date --nomp simulations
 python main.py --bgn $bgn_date --stp $stp_date quick

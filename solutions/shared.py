@@ -36,7 +36,11 @@ def get_css_db(cross_section_stats: str) -> CDbStruct:
             primary_keys=[CSqlVar("trade_date", "TEXT")],
             value_columns=[
                 CSqlVar("volatility", "REAL"),
+                CSqlVar("skewness", "REAL"),
+                CSqlVar("kurtosis", "REAL"),
                 CSqlVar("vma", "REAL"),
+                CSqlVar("sma", "REAL"),
+                CSqlVar("kma", "REAL"),
                 CSqlVar("tot_wgt", "REAL"),
             ],
         ),

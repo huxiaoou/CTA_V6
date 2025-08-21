@@ -22,7 +22,7 @@ class CCrossSectionCalculator:
         return avlb_data
 
     @staticmethod
-    def cal_cs_vol(z: pd.DataFrame, ret: str = "return", amt: str = "amount") -> float:
+    def cal_cs_vol(z: pd.DataFrame, ret: str = "return", amt: str = "amount") -> pd.Series:
         """
 
         :param z: columns contains [ret, amt] at least
@@ -31,7 +31,12 @@ class CCrossSectionCalculator:
         :return:
         """
         wgt = z[amt] / z[amt].sum()
-        return weighted_volatility(x=z[ret], wgt=wgt)
+        d = {
+            "volatility": weighted_volatility(x=z[ret], wgt=wgt),
+            "skewness": z[ret].skew(),
+            "kurtosis": z[ret].kurtosis(),
+        }
+        return pd.Series(d)
 
     def save(self, new_data: pd.DataFrame, bgn_date: str, calendar: CCalendar):
         """
@@ -54,9 +59,11 @@ class CCrossSectionCalculator:
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         buffer_bgn_date = calendar.get_next_date(bgn_date, shift=-5)
         avlb_data = self.load_avlb_data(buffer_bgn_date, stp_date)
-        cs_volatility = avlb_data.groupby(by="trade_date").apply(self.cal_cs_vol)
-        new_data = cs_volatility.reset_index().rename(columns={0: "volatility"})
+        css = avlb_data.groupby(by="trade_date").apply(self.cal_cs_vol)
+        new_data = css.reset_index()
         new_data["vma"] = new_data["volatility"].rolling(window=5).mean()
+        new_data["sma"] = new_data["skewness"].rolling(window=5).mean()
+        new_data["kma"] = new_data["kurtosis"].rolling(window=5).mean()
         new_data["tot_wgt"] = new_data["vma"].map(lambda z: 1 if z < 0.0175 else 0.5)
         new_data = new_data.query(f"trade_date >= '{bgn_date}'")
         self.save(new_data=new_data, bgn_date=bgn_date, calendar=calendar)

@@ -7,9 +7,10 @@ from math_tools.weighted import weighted_volatility
 
 
 class CCrossSectionCalculator:
-    def __init__(self, db_struct_avlb: CDbStruct, db_struct_css: CDbStruct):
+    def __init__(self, db_struct_avlb: CDbStruct, db_struct_css: CDbStruct, sectors: list[str]):
         self.db_struct_avlb = db_struct_avlb
         self.db_struct_css = db_struct_css
+        self.sectors = sectors
 
     def load_avlb_data(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
         sqldb = CMgrSqlDb(
@@ -22,21 +23,23 @@ class CCrossSectionCalculator:
         return avlb_data
 
     @staticmethod
-    def cal_cs_vol(z: pd.DataFrame, ret: str = "return", amt: str = "amount") -> pd.Series:
+    def cal_cs_vol(data: pd.DataFrame, ret: str = "return", amt: str = "amount") -> pd.Series:
         """
 
-        :param z: columns contains [ret, amt] at least
+        :param data: columns contains [ret, amt] at least
         :param ret:
         :param amt:
         :return:
         """
-        wgt = z[amt] / z[amt].sum()
         d = {
-            "volatility": weighted_volatility(x=z[ret], wgt=wgt),
-            "skewness": z[ret].skew(),
-            "kurtosis": z[ret].kurtosis(),
+            "volatility": weighted_volatility(x=data[ret], wgt=data[amt]),
+            "skewness": data[ret].skew(),
+            "kurtosis": data[ret].kurtosis(),
         }
-        return pd.Series(d)
+        sector_volatility = data.groupby(by="sectorL1").apply(
+            lambda _: weighted_volatility(x=_[ret], wgt=_[amt])
+        )
+        return pd.concat([pd.Series(d), sector_volatility], axis=0)
 
     def save(self, new_data: pd.DataFrame, bgn_date: str, calendar: CCalendar):
         """
@@ -53,14 +56,20 @@ class CCrossSectionCalculator:
             table=self.db_struct_css.table,
             mode="a",
         )
+        save_data = new_data[self.db_struct_css.table.vars.names]
         if sqldb.check_continuity(bgn_date, calendar) == 0:
-            sqldb.update(update_data=new_data)
+            sqldb.update(update_data=save_data)
+
+    @property
+    def rename_mapper(self) -> dict:
+        return {s: f"volatility_{s}" for s in self.sectors}
 
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         buffer_bgn_date = calendar.get_next_date(bgn_date, shift=-5)
         avlb_data = self.load_avlb_data(buffer_bgn_date, stp_date)
         css = avlb_data.groupby(by="trade_date").apply(self.cal_cs_vol)
-        new_data = css.reset_index()
+        css[self.sectors] = css[self.sectors].rolling(window=5).mean()
+        new_data = css.reset_index().rename(columns=self.rename_mapper)
         new_data["vma"] = new_data["volatility"].rolling(window=5).mean()
         new_data["sma"] = new_data["skewness"].rolling(window=5).mean()
         new_data["kma"] = new_data["kurtosis"].rolling(window=5).mean()

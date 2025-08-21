@@ -54,8 +54,9 @@ def weighted_volatility(x: pd.Series, wgt: pd.Series = None) -> float:
     if wgt is None:
         return x.std()
     else:
-        mu = x @ wgt
-        x2 = (x ** 2) @ wgt
+        w = wgt / wgt.abs().sum()
+        mu = x @ w
+        x2 = (x ** 2) @ w
         return np.sqrt(x2 - mu ** 2)
 
 

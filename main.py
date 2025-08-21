@@ -107,8 +107,8 @@ if __name__ == "__main__":
     args = parse_args(cfg_facs=cfg_factors)
     bgn_date, stp_date = args.bgn, args.stp or calendar.get_next_date(args.bgn, shift=1)
     db_struct_avlb = get_avlb_db(proj_cfg.available_dir)
-    db_struct_mkt = get_market_db(proj_cfg.market_dir, proj_cfg.const.SECTORS)
-    db_struct_css = get_css_db(proj_cfg.cross_section_stats_dir)
+    db_struct_mkt = get_market_db(proj_cfg.market_dir, proj_cfg.sectors)
+    db_struct_css = get_css_db(proj_cfg.cross_section_stats_dir, sectors=proj_cfg.sectors)
 
     if args.switch == "available":
         from solutions.available import main_available
@@ -127,6 +127,7 @@ if __name__ == "__main__":
         css = CCrossSectionCalculator(
             db_struct_avlb=db_struct_avlb,
             db_struct_css=db_struct_css,
+            sectors=proj_cfg.sectors,
         )
         css.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
     elif args.switch == "market":
@@ -139,7 +140,7 @@ if __name__ == "__main__":
             db_struct_mkt=db_struct_mkt,
             path_mkt_idx_data=proj_cfg.market_index_path,
             mkt_idxes=proj_cfg.mkt_idxes.idxes,
-            sectors=proj_cfg.const.SECTORS,
+            sectors=proj_cfg.sectors,
         )
     elif args.switch == "test_return":
         from solutions.test_return import CTestReturnsByInstru, CTestReturnsAvlb

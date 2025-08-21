@@ -99,8 +99,13 @@ if __name__ == "__main__":
 
     sep("Universe")
     print(f"Size of universe = {len(universe)}")
-    for instru, sectors in universe.items():
-        print(f"{instru:>6s}: {sectors}")
+    for instru, instru_cfg in universe.items():
+        print(f"{instru:>6s}: {instru_cfg}")
+
+    sep("Sectors")
+    print(f"Number of sectors = {len(proj_cfg.sectors)}")
+    for i, sector in enumerate(proj_cfg.sectors):
+        print(f"{i}. {sector}")
 
     sep("Strategies")
     for strategy in proj_cfg.strategies:
@@ -112,3 +117,6 @@ if __name__ == "__main__":
 
     sep("Cfg for factors")
     print(cfg_factors)
+
+    sep("const")
+    print(proj_cfg.const)

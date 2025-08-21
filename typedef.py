@@ -43,7 +43,6 @@ class CCfgTst:
 class CCfgConst:
     INIT_CASH: float
     COST_RATE: float
-    SECTORS: list[str]
     LAG: int
 
 
@@ -91,6 +90,10 @@ class CCfgProj:
     tst: CCfgTst
     strategies: list[CStrategy]
     portfolios: list[CPortfolio]
+
+    @property
+    def sectors(self) -> list[str]:
+        return sorted(list(set([v.sectorL1 for v in self.universe.values()])))
 
     @property
     def all_rets(self) -> TRets:

@@ -121,15 +121,6 @@ if __name__ == "__main__":
             db_struct_avlb=db_struct_avlb,
             calendar=calendar,
         )
-    elif args.switch == "css":
-        from solutions.css import CCrossSectionCalculator
-
-        css = CCrossSectionCalculator(
-            db_struct_avlb=db_struct_avlb,
-            db_struct_css=db_struct_css,
-            sectors=proj_cfg.sectors,
-        )
-        css.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
     elif args.switch == "market":
         from solutions.market import main_market
 
@@ -142,6 +133,16 @@ if __name__ == "__main__":
             mkt_idxes=proj_cfg.mkt_idxes.idxes,
             sectors=proj_cfg.sectors,
         )
+    elif args.switch == "css":
+        from solutions.css import CCrossSectionCalculator
+
+        css = CCrossSectionCalculator(
+            db_struct_avlb=db_struct_avlb,
+            db_struct_css=db_struct_css,
+            db_struct_mkt=db_struct_mkt,
+            sectors=proj_cfg.sectors,
+        )
+        css.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
     elif args.switch == "test_return":
         from solutions.test_return import CTestReturnsByInstru, CTestReturnsAvlb
 

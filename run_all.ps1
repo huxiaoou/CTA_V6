@@ -10,8 +10,8 @@ $bgn_date = "20170103"
 $stp_date = "20250701"
 
 python main.py --bgn $bgn_date_avlb --stp $stp_date available
-python main.py --bgn $bgn_date_avlb --stp $stp_date css
 python main.py --bgn $bgn_date_avlb --stp $stp_date market
+python main.py --bgn $bgn_date_avlb --stp $stp_date css
 python main.py --bgn $bgn_date_avlb --stp $stp_date test_return
 
 python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass BASIS

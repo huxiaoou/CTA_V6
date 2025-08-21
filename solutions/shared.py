@@ -28,9 +28,14 @@ def get_avlb_db(available_dir: str) -> CDbStruct:
 
 
 def get_css_db(cross_section_stats: str, sectors: list[str]) -> CDbStruct:
+    others = (
+            [CSqlVar(f"volatility_{z}", "REAL") for z in sectors]
+            + [CSqlVar("volatility_sector", "REAL")]
+    )
     return CDbStruct(
         db_save_dir=cross_section_stats,
         db_name="cross_section_stats.db",
+
         table=CSqlTable(
             name="css",
             primary_keys=[CSqlVar("trade_date", "TEXT")],
@@ -42,7 +47,7 @@ def get_css_db(cross_section_stats: str, sectors: list[str]) -> CDbStruct:
                               CSqlVar("sma", "REAL"),
                               CSqlVar("kma", "REAL"),
                               CSqlVar("tot_wgt", "REAL"),
-                          ] + [CSqlVar(f"volatility_{z}", "REAL") for z in sectors],
+                          ] + others,
         ),
     )
 

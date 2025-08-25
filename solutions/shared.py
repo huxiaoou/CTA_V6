@@ -47,6 +47,7 @@ def get_css_db(cross_section_stats: str, sectors: list[str]) -> CDbStruct:
                               CSqlVar("sma", "REAL"),
                               CSqlVar("kma", "REAL"),
                               CSqlVar("tot_wgt", "REAL"),
+                              CSqlVar("sev", "REAL"),  # ratio of Significant Eigen Values
                           ] + others,
         ),
     )

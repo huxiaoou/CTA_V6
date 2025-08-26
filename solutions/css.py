@@ -88,7 +88,27 @@ class CCrossSectionCalculator:
         return {s: f"volatility_{s}" for s in self.sectors}
 
     @staticmethod
-    def cal_ratio_sev(data: pd.DataFrame, win: int, ret: str = "return") -> pd.DataFrame:
+    def cal_ratio_sev(slc_rets: pd.DataFrame) -> float:
+        slc_corr = slc_rets.corr().dropna(axis=1, how="all").dropna(axis=0, how="all")
+        p0 = slc_corr.shape[1]
+        res = la.eig(slc_corr)
+        sig_ev = res.eigenvalues[res.eigenvalues > 1]
+        r0 = sig_ev.sum() / p0
+        if np.iscomplex(r0):
+            print(f"{r0=:}")
+        return np.real(r0)
+
+    @staticmethod
+    def cal_dcov(slc_rets: pd.DataFrame, prev_cov: pd.DataFrame) -> tuple[float, pd.DataFrame]:
+        this_cov = slc_rets.cov() * 1e6
+        if not prev_cov.empty:
+            diff = (this_cov - prev_cov).dropna(axis=1, how="all").dropna(axis=0, how="all")
+            dcov = diff.fillna(0).abs().mean().mean()
+        else:
+            dcov = 0
+        return dcov, this_cov
+
+    def cal_ratio_sev_dcov(self, data: pd.DataFrame, win: int, ret: str = "return") -> pd.DataFrame:
         """
 
         :param data:
@@ -96,16 +116,6 @@ class CCrossSectionCalculator:
         :param ret:
         :return:
         """
-
-        def __ratio_sev(slc_rets: pd.DataFrame) -> float:
-            slc_corr = slc_rets.corr().dropna(axis=1, how="all").dropna(axis=0, how="all")
-            p0 = slc_corr.shape[1]
-            res = la.eig(slc_corr)
-            sig_ev = res.eigenvalues[res.eigenvalues > 1]
-            r0 = sig_ev.sum() / p0
-            if np.iscomplex(r0):
-                print(f"{r0=:}")
-            return np.real(r0)
 
         avlb_instruments: dict[str, list[str]] = data.groupby(by="trade_date").apply(
             lambda z: z["instrument"].to_list()).to_dict()
@@ -116,20 +126,25 @@ class CCrossSectionCalculator:
             columns="instrument",
             values=ret,
         ).fillna(0)
-        sev: list = []
-        for i in track(range(win - 1, len(rets_by_date)), description="Calculating ratio sev"):
+        results: list = []
+        prev_cov: pd.DataFrame = pd.DataFrame()
+        for i in track(range(win - 1, len(rets_by_date)), description="Calculating ratio res"):
             bgn, stp = i - win + 1, i + 1
             sub_df = rets_by_date.iloc[bgn:stp, :]
             trade_date: str = sub_df.index[-1]  # type:ignore
             instrus = avlb_instruments[trade_date]
             slc_data = sub_df[instrus]
-            sev.append(
+            sev = self.cal_ratio_sev(slc_data)
+            dcov, this_cov = self.cal_dcov(slc_data, prev_cov)
+            results.append(
                 {
                     "trade_date": trade_date,
-                    "sev": __ratio_sev(slc_data),
+                    "sev": sev,
+                    "dcov": dcov,
                 }
             )
-        df = pd.DataFrame(sev)
+            prev_cov = this_cov
+        df = pd.DataFrame(results)
         df["sev"] = df["sev"].diff().abs().rolling(window=5).mean()
         return df
 
@@ -151,7 +166,7 @@ class CCrossSectionCalculator:
         new_data["tot_wgt"] = new_data["vma"].map(lambda z: 1 if z < self.cfg_css.vma_threshold else 0.5)
 
         # --- ratio-sev
-        sev = self.cal_ratio_sev(data=avlb_data, win=self.cfg_css.sev_win)
+        sev = self.cal_ratio_sev_dcov(data=avlb_data, win=self.cfg_css.sev_win)
 
         # --- merge
         new_data = new_data.merge(

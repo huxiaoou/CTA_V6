@@ -179,7 +179,7 @@ available:
 css:
   vma_win: 5
   vma_threshold: 0.0175
-  sev_win: 60
+  sev_win: 20
 
 tst:
   wins: [ 1, 5 ]

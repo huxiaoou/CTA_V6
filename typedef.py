@@ -34,6 +34,17 @@ class CCfgAvlbUnvrs:
 
 
 @dataclass(frozen=True)
+class CCfgCss:
+    vma_win: int
+    vma_threshold: float
+    sev_win: int
+
+    @property
+    def buffer_win(self) -> int:
+        return max(self.vma_win, self.sev_win)
+
+
+@dataclass(frozen=True)
 class CCfgTst:
     wins: list[int]
     wins_qtest: list[int]  # for ic and vt
@@ -85,6 +96,7 @@ class CCfgProj:
     # --- project parameters
     universe: TUniverse
     avlb_unvrs: CCfgAvlbUnvrs
+    css: CCfgCss
     mkt_idxes: CCfgMktIdx
     const: CCfgConst
     tst: CCfgTst

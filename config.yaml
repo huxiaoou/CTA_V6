@@ -175,6 +175,12 @@ available:
   amount_threshold: 100000.00
   win_vol: 60
   win_vol_min: 20
+
+css:
+  vma_win: 5
+  vma_threshold: 0.0175
+  sev_win: 60
+
 tst:
   wins: [ 1, 5 ]
   wins_qtest: [ 5 ] # must be subset of wins

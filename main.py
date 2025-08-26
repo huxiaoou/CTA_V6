@@ -137,6 +137,7 @@ if __name__ == "__main__":
         from solutions.css import CCrossSectionCalculator
 
         css = CCrossSectionCalculator(
+            cfg_css=proj_cfg.css,
             db_struct_avlb=db_struct_avlb,
             db_struct_css=db_struct_css,
             db_struct_mkt=db_struct_mkt,

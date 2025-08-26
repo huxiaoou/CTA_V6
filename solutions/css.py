@@ -7,16 +7,19 @@ from husfort.qutility import check_and_makedirs, SFG
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from math_tools.weighted import weighted_volatility
+from typedef import CCfgCss
 
 
 class CCrossSectionCalculator:
     def __init__(
             self,
+            cfg_css: CCfgCss,
             db_struct_avlb: CDbStruct,
             db_struct_mkt: CDbStruct,
             db_struct_css: CDbStruct,
             sectors: list[str],
     ):
+        self.cfg_css = cfg_css
         self.db_struct_avlb = db_struct_avlb
         self.db_struct_mkt = db_struct_mkt
         self.db_struct_css = db_struct_css
@@ -85,12 +88,12 @@ class CCrossSectionCalculator:
         return {s: f"volatility_{s}" for s in self.sectors}
 
     @staticmethod
-    def cal_ratio_sev(data: pd.DataFrame, ret: str = "return", win: int = 20) -> pd.DataFrame:
+    def cal_ratio_sev(data: pd.DataFrame, win: int, ret: str = "return") -> pd.DataFrame:
         """
 
         :param data:
-        :param ret:
         :param win:
+        :param ret:
         :return:
         """
 
@@ -126,10 +129,12 @@ class CCrossSectionCalculator:
                     "sev": __ratio_sev(slc_data),
                 }
             )
-        return pd.DataFrame(sev)
+        df = pd.DataFrame(sev)
+        df["sev"] = df["sev"].diff().abs().rolling(window=5).mean()
+        return df
 
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
-        buffer_bgn_date = calendar.get_next_date(bgn_date, shift=-20)
+        buffer_bgn_date = calendar.get_next_date(bgn_date, shift=-self.cfg_css.buffer_win)
         avlb_data = self.load_avlb_data(buffer_bgn_date, stp_date)
         mkt_idx_data = self.load_mkt_idx(buffer_bgn_date, stp_date)
 
@@ -138,15 +143,15 @@ class CCrossSectionCalculator:
 
         # --- general sector statistics
         css = avlb_data.groupby(by="trade_date").apply(self.cal_cs_vol)
-        css[self.sectors] = css[self.sectors].rolling(window=5).mean()
+        css[self.sectors] = css[self.sectors].rolling(window=self.cfg_css.vma_win).mean()
         new_data = css.reset_index().rename(columns=self.rename_mapper)
-        new_data["vma"] = new_data["volatility"].rolling(window=5).mean()
-        new_data["sma"] = new_data["skewness"].rolling(window=5).mean()
-        new_data["kma"] = new_data["kurtosis"].rolling(window=5).mean()
-        new_data["tot_wgt"] = new_data["vma"].map(lambda z: 1 if z < 0.0175 else 0.5)
+        new_data["vma"] = new_data["volatility"].rolling(window=self.cfg_css.vma_win).mean()
+        new_data["sma"] = new_data["skewness"].rolling(window=self.cfg_css.vma_win).mean()
+        new_data["kma"] = new_data["kurtosis"].rolling(window=self.cfg_css.vma_win).mean()
+        new_data["tot_wgt"] = new_data["vma"].map(lambda z: 1 if z < self.cfg_css.vma_threshold else 0.5)
 
         # --- ratio-sev
-        sev = self.cal_ratio_sev(data=avlb_data, ret="return", win=20)
+        sev = self.cal_ratio_sev(data=avlb_data, win=self.cfg_css.sev_win)
 
         # --- merge
         new_data = new_data.merge(

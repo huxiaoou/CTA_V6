@@ -7,7 +7,7 @@ $bgn_date_sig_fac = $bgn_date_qtest
 $bgn_date_opt = "20161229" # must at least 2 days ahead of bgn date
 $bgn_date_sig_stg = $bgn_date_opt
 $bgn_date = "20170103"
-$stp_date = "20250701"
+$stp_date = "20250801"
 
 python main.py --bgn $bgn_date_avlb --stp $stp_date available
 python main.py --bgn $bgn_date_avlb --stp $stp_date market

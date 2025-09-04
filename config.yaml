@@ -176,6 +176,10 @@ available:
   win_vol: 60
   win_vol_min: 20
 
+icov:
+  win: 20
+
+
 css:
   vma_win: 5
   vma_threshold: 0.0175

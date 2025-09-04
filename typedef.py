@@ -45,6 +45,11 @@ class CCfgCss:
 
 
 @dataclass(frozen=True)
+class CCfgICov:
+    win: int
+
+
+@dataclass(frozen=True)
 class CCfgTst:
     wins: list[int]
     wins_qtest: list[int]  # for ic and vt
@@ -97,6 +102,7 @@ class CCfgProj:
     universe: TUniverse
     avlb_unvrs: CCfgAvlbUnvrs
     css: CCfgCss
+    icov: CCfgICov
     mkt_idxes: CCfgMktIdx
     const: CCfgConst
     tst: CCfgTst
@@ -124,6 +130,10 @@ class CCfgProj:
     @property
     def cross_section_stats_dir(self) -> str:
         return os.path.join(self.project_root_dir, "cross_section_stats")
+
+    @property
+    def instru_covar_dir(self) -> str:
+        return os.path.join(self.project_root_dir, "instru_covar")
 
     @property
     def market_dir(self):

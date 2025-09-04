@@ -27,13 +27,13 @@ def get_avlb_db(available_dir: str) -> CDbStruct:
     )
 
 
-def get_css_db(cross_section_stats: str, sectors: list[str]) -> CDbStruct:
+def get_css_db(cross_section_stats_dir: str, sectors: list[str]) -> CDbStruct:
     others = (
             [CSqlVar(f"volatility_{z}", "REAL") for z in sectors]
             + [CSqlVar("volatility_sector", "REAL")]
     )
     return CDbStruct(
-        db_save_dir=cross_section_stats,
+        db_save_dir=cross_section_stats_dir,
         db_name="cross_section_stats.db",
 
         table=CSqlTable(
@@ -50,6 +50,22 @@ def get_css_db(cross_section_stats: str, sectors: list[str]) -> CDbStruct:
                               CSqlVar("sev", "REAL"),  # ratio of Significant Eigen Values
                               CSqlVar("dcov", "REAL"),  # difference of co-variance
                           ] + others,
+        ),
+    )
+
+
+def get_icov_db(icov_db_dir: str) -> CDbStruct:
+    return CDbStruct(
+        db_save_dir=icov_db_dir,
+        db_name="icov.db",
+        table=CSqlTable(
+            name="icov",
+            primary_keys=[
+                CSqlVar("trade_date", "TEXT"),
+                CSqlVar("instrument0", "TEXT"),
+                CSqlVar("instrument1", "TEXT"),
+            ],
+            value_columns=[CSqlVar("cov", "REAL")]
         ),
     )
 

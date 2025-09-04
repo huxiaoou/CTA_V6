@@ -2,7 +2,7 @@ import yaml
 from husfort.qsqlite import CDbStruct, CSqlTable
 from typedefs.typedefInstrus import TUniverse, TInstruName, CCfgInstru
 from typedefs.typedefStrategies import CStrategy, CPortfolio
-from typedef import CCfgAvlbUnvrs, CCfgCss, CCfgMktIdx, CCfgConst, CCfgTst
+from typedef import CCfgAvlbUnvrs, CCfgCss, CCfgICov, CCfgMktIdx, CCfgConst, CCfgTst
 from typedef import CCfgProj, CCfgDbStruct
 from solutions.factor import CCfgFactors
 
@@ -39,6 +39,7 @@ proj_cfg = CCfgProj(
     universe=universe,
     avlb_unvrs=CCfgAvlbUnvrs(**_config["available"]),
     css=CCfgCss(**_config["css"]),
+    icov=CCfgICov(**_config["icov"]),
     mkt_idxes=CCfgMktIdx(**_config["mkt_idxes"]),
     const=CCfgConst(**_config["CONST"]),
     tst=CCfgTst(**_config["tst"]),
@@ -110,6 +111,9 @@ if __name__ == "__main__":
 
     sep("css")
     print(proj_cfg.css)
+
+    sep("icov")
+    print(proj_cfg.icov)
 
     sep("Strategies")
     for strategy in proj_cfg.strategies:

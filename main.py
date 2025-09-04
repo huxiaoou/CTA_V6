@@ -25,8 +25,11 @@ def parse_args(cfg_facs: CCfgFactors):
     # switch: available
     arg_parser_subs.add_parser(name="available", help="Calculate available universe")
 
-    # switch: available
+    # switch: css
     arg_parser_subs.add_parser(name="css", help="Calculate cross section statistics")
+
+    # switch: icov
+    arg_parser_subs.add_parser(name="icov", help="Calculate covariance matrix of instruments")
 
     # switch: market
     arg_parser_subs.add_parser(name="market", help="Calculate market universe")
@@ -144,6 +147,17 @@ if __name__ == "__main__":
             sectors=proj_cfg.sectors,
         )
         css.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
+    elif args.switch == "icov":
+        from solutions.icov import CICOV
+
+        icov = CICOV(
+            cfg_icov=proj_cfg.icov,
+            universe=proj_cfg.universe,
+            db_struct_preprocess=db_struct_cfg.preprocess,
+            icov_db_dir=proj_cfg.instru_covar_dir,
+        )
+        icov.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
+
     elif args.switch == "test_return":
         from solutions.test_return import CTestReturnsByInstru, CTestReturnsAvlb
 

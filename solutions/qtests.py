@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from typing import Literal
-from rich.progress import Progress, TaskID
+from rich.progress import Progress, TaskID, TimeElapsedColumn, TimeRemainingColumn, TextColumn, BarColumn
 from husfort.qutility import check_and_makedirs, SFG
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
@@ -171,7 +171,12 @@ class __CQTest:
             on=["trade_date", "instrument"],
             how="left",
         )
-        with Progress() as pb:
+        with Progress(
+                TextColumn("{task.description}"),
+                BarColumn(),
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
+        ) as pb:
             task = pb.add_task(description=f"{self.save_id}")
             pb.update(task_id=task, completed=0, total=len(input_data["trade_date"].unique()))
             qtest_data = input_data.groupby(by="trade_date").apply(self.core, pb=pb, task=task)

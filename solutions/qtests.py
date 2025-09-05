@@ -3,17 +3,20 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from typing import Literal
-from typedefs.typedefReturns import CRet, TRets
-from typedefs.typedefFactors import CCfgFactorGrp
+from rich.progress import Progress, TaskID
 from husfort.qutility import check_and_makedirs, SFG
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qplot import CPlotLines
+from husfort.qoptimization import COptimizerPortfolioSharpe
+from typedefs.typedefReturns import CRet, TRets
+from typedefs.typedefFactors import CCfgFactorGrp
+from typedef import TFactorsAvlbDirType, TTestReturnsAvlbDirType
+from math_tools.weighted import gen_exp_wgt, wic, map_to_weight
 from solutions.test_return import CTestReturnLoader
 from solutions.factor import CFactorsLoader
 from solutions.shared import gen_ic_tests_db, gen_vt_tests_db
-from math_tools.weighted import gen_exp_wgt, wic
-from typedef import TFactorsAvlbDirType, TTestReturnsAvlbDirType
+from solutions.icov import CICOVReader
 
 
 class __CQTest:
@@ -68,6 +71,9 @@ class __CQTest:
         data = sqldb.read_by_range(bgn_date, stp_date, value_columns=["trade_date", "instrument", "volatility"])
         return data
 
+    def load_other_data(self, bgn_date: str, stp_date: str):
+        pass
+
     def gen_test_db_struct(self) -> CDbStruct:
         raise NotImplementedError
 
@@ -107,7 +113,9 @@ class __CQTest:
         )
         return data
 
-    def core(self, data: pd.DataFrame, volatility: str = "volatility") -> pd.Series:
+    def core(
+            self, data: pd.DataFrame, volatility: str = "volatility", pb: Progress = None, task: TaskID = None,
+    ) -> pd.Series:
         raise NotImplementedError
 
     def get_plot_ylim(self) -> tuple[float, float]:
@@ -145,6 +153,7 @@ class __CQTest:
         iter_dates = calendar.get_iter_list(buffer_bgn_date, stp_date)
         save_dates = iter_dates[self.ret.shift:]
         base_bgn_date, base_stp_date = iter_dates[0], iter_dates[-self.ret.shift]
+        self.load_other_data(bgn_date=base_bgn_date, stp_date=base_stp_date)
         returns_data = self.load_returns(base_bgn_date, base_stp_date)
         factors_data = self.load_factors(base_bgn_date, base_stp_date)
         avlb_data = self.load_avlb(base_bgn_date, base_stp_date)
@@ -162,9 +171,12 @@ class __CQTest:
             on=["trade_date", "instrument"],
             how="left",
         )
-        ic_data = input_data.groupby(by="trade_date").apply(self.core)
-        ic_data["trade_date"] = save_dates
-        new_data = ic_data[["trade_date"] + self.factor_grp.factor_names]
+        with Progress() as pb:
+            task = pb.add_task(description=f"{self.save_id}")
+            pb.update(task_id=task, completed=0, total=len(input_data["trade_date"].unique()))
+            qtest_data = input_data.groupby(by="trade_date").apply(self.core, pb=pb, task=task)
+        qtest_data["trade_date"] = save_dates
+        new_data = qtest_data[["trade_date"] + self.factor_grp.factor_names]
         new_data = new_data.reset_index(drop=True)
         self.save(new_data, calendar)
         logger.info(f"{self.__class__.__name__} for {SFG(self.save_id)} finished.")
@@ -183,7 +195,9 @@ class __CQTest:
 # --------- ic-tests ---------
 # ----------------------------
 class CICTest(__CQTest):
-    def core(self, data: pd.DataFrame, volatility: str = "volatility") -> pd.Series:
+    def core(
+            self, data: pd.DataFrame, volatility: str = "volatility", pb: Progress = None, task: TaskID = None,
+    ) -> pd.Series:
         if self.volatility_adjusted:
             data[volatility] = data[volatility].fillna(data[volatility].median())
             s = {}
@@ -192,6 +206,7 @@ class CICTest(__CQTest):
             s = pd.Series(s)
         else:
             s = data[self.factor_grp.factor_names].corrwith(data[self.ret.ret_name], axis=0, method="spearman")
+        pb.update(task_id=task, advance=1)
         return s
 
     def gen_test_db_struct(self) -> CDbStruct:
@@ -237,7 +252,9 @@ class CICTest(__CQTest):
 # --------- vt-tests ---------
 # ----------------------------
 class CVTTest(__CQTest):
-    def core(self, data: pd.DataFrame, volatility: str = "volatility") -> pd.Series:
+    def core(
+            self, data: pd.DataFrame, volatility: str = "volatility", pb: Progress = None, task: TaskID = None,
+    ) -> pd.Series:
         wgt = gen_exp_wgt(k=len(data), rate=0.25)
         s = {}
         if self.volatility_adjusted:
@@ -253,6 +270,7 @@ class CVTTest(__CQTest):
                 w = wgt
                 s[factor] = factor_data[self.ret.ret_name] @ w / self.ret.win
         s = pd.Series(s)
+        pb.update(task_id=task, advance=1)
         return s
 
     def gen_test_db_struct(self) -> CDbStruct:
@@ -291,6 +309,55 @@ class CVTTest(__CQTest):
         return report
 
 
+class COTTest(CVTTest):
+    def __init__(self, icov_dir: str, **kwargs):
+        super().__init__(**kwargs)
+        self.icov_reader = CICOVReader(icov_db_dir=icov_dir)
+        self.icov_data: pd.DataFrame = pd.DataFrame()
+
+    def load_other_data(self, bgn_date: str, stp_date: str):
+        self.icov_data = self.icov_reader.read(bgn_date, stp_date)
+
+    def get_cov_at_trade_date(self, trade_date: str, instruments: list[str]) -> pd.DataFrame:
+        trade_date_icov = self.icov_data.query(f"trade_date == '{trade_date}'")
+        partial_cov = trade_date_icov.pivot(
+            index="instrument0", columns="instrument1", values="cov",
+        ).fillna(0).loc[instruments, instruments]
+        variance = pd.DataFrame(data=np.diag(np.diag(partial_cov)), index=partial_cov.index,
+                                columns=partial_cov.columns)
+        instrus_cov = partial_cov + partial_cov.T - variance
+        return instrus_cov
+
+    def core(
+            self, data: pd.DataFrame, volatility: str = "volatility", pb: Progress = None, task: TaskID = None,
+    ) -> pd.Series:
+        trade_date = data["trade_date"].iloc[0]
+        instruments = data["instrument"].tolist()
+        covariance = self.get_cov_at_trade_date(trade_date, instruments)
+        k = len(data)
+        s = {}
+        for factor in self.factor_grp.factor_names:
+            x0 = map_to_weight(data[factor], rate=1.00)
+            optimizer = COptimizerPortfolioSharpe(
+                m=data[factor].to_numpy() * 0.01,
+                v=covariance.to_numpy(),
+                x0=x0.to_numpy(),
+                bounds=[(-3 / k, 3 / k)] * k,
+                tot_mkt_val_bds=(1.0, 1.0),
+                tol=1e-8,
+            )
+            res = optimizer.optimize()
+            wv, fv = res.x, res.fun
+            # print(pd.Series(wv).round(6))
+            # print(fv)
+            # print(np.sum(np.abs(wv)))
+            # breakpoint()
+            s[factor] = data[self.ret.ret_name] @ wv / self.ret.win
+        s = pd.Series(s)
+        pb.update(task_id=task, advance=1)
+        return s
+
+
 # --------------------------
 # --- interface for main ---
 # --------------------------
@@ -303,28 +370,37 @@ def main_qtests(
         aux_args_list: list[TICTestAuxArgs],
         db_struct_avlb: CDbStruct,
         tests_dir: str,
+        icov_dir: str,
         bgn_date: str,
         stp_date: str,
         calendar: CCalendar,
-        test_type: Literal["ic", "vt"],
+        test_type: Literal["ic", "vt", "ot"],
         volatility_adjusted: bool,
 ):
+    extra_args = {}
     if test_type == "ic":
         test_cls = CICTest
     elif test_type == "vt":
         test_cls = CVTTest
+    elif test_type == "ot":
+        test_cls = COTTest
+        extra_args.update({"icov_dir": icov_dir})
+    else:
+        raise ValueError("test_type must be in ['ic', 'vt', 'ot']")
 
     for ret in rets:
         for factors_avlb_dir, test_returns_avlb_dir in aux_args_list:
-            test = test_cls(
-                factor_grp=factor_grp,
-                ret=ret,
-                factors_avlb_dir=factors_avlb_dir,
-                test_returns_avlb_dir=test_returns_avlb_dir,
-                db_struct_avlb=db_struct_avlb,
-                tests_dir=tests_dir,
-                volatility_adjusted=volatility_adjusted,
-            )
+            kwargs = {
+                "factor_grp": factor_grp,
+                "ret": ret,
+                "factors_avlb_dir": factors_avlb_dir,
+                "test_returns_avlb_dir": test_returns_avlb_dir,
+                "db_struct_avlb": db_struct_avlb,
+                "tests_dir": tests_dir,
+                "volatility_adjusted": volatility_adjusted,
+            }
+            kwargs.update(extra_args)
+            test = test_cls(**kwargs)
             test.main(bgn_date, stp_date, calendar)
             test.main_summary(bgn_date, stp_date)
     return 0

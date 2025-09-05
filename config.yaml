@@ -177,7 +177,7 @@ available:
   win_vol_min: 20
 
 icov:
-  win: 20
+  win: 60
 
 
 css:

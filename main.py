@@ -69,6 +69,18 @@ def parse_args(cfg_facs: CCfgFactors):
         help="using volatility to adjust",
     )
 
+    # switch: ot
+    arg_parser_sub = arg_parser_subs.add_parser(name="ot", help="Calculate ot_tests")
+    arg_parser_sub.add_argument(
+        "--fclass", type=str,
+        help="factor class to test",
+        required=True, choices=cfg_facs.classes,
+    )
+    arg_parser_sub.add_argument(
+        "--va", default=False, action="store_true",
+        help="using volatility to adjust",
+    )
+
     # switch: test return
     arg_parser_subs.add_parser(name="optimize", help="Calculate optimal weights of factors in strategies")
 
@@ -206,18 +218,25 @@ if __name__ == "__main__":
             db_struct_avlb=db_struct_avlb,
         )
         fac_avlb.main(bgn_date, stp_date, calendar)
-    elif args.switch in ("ic", "vt"):
+    elif args.switch in ("ic", "vt", "ot"):
         from solutions.qtests import main_qtests, TICTestAuxArgs
 
         factor_grp = cfg_factors.get_cfg(factor_class=args.fclass)
         aux_args_list: list[TICTestAuxArgs] = [
             (proj_cfg.factors_avlb_ewa_dir, proj_cfg.test_returns_avlb_raw_dir)
         ]
+        tests_dir = {
+            "ic": proj_cfg.ic_tests_dir,
+            "vt": proj_cfg.vt_tests_dir,
+            "ot": proj_cfg.ot_tests_dir,
+        }[args.switch]
+
         main_qtests(
             rets=proj_cfg.qtest_rets,
             factor_grp=factor_grp,
             aux_args_list=aux_args_list,
-            tests_dir=proj_cfg.ic_tests_dir if args.switch == "ic" else proj_cfg.vt_tests_dir,
+            tests_dir=tests_dir,
+            icov_dir=proj_cfg.instru_covar_dir,
             db_struct_avlb=db_struct_avlb,
             bgn_date=bgn_date,
             stp_date=stp_date,

@@ -168,6 +168,10 @@ class CCfgProj:
         return os.path.join(self.project_root_dir, "vt_tests")
 
     @property
+    def ot_tests_dir(self):
+        return os.path.join(self.project_root_dir, "ot_tests")
+
+    @property
     def optimize_dir(self):
         return os.path.join(self.project_root_dir, "optimize")
 

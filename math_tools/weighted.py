@@ -22,7 +22,7 @@ def adjust_weights(raw_weights: pd.DataFrame, tot_wgt: pd.DataFrame, weight: str
     return weights
 
 
-def map_to_weight(data: pd.DataFrame, rate: float = 0.25) -> pd.DataFrame:
+def map_to_weight(data: Union[pd.DataFrame, pd.Series], rate: float = 0.25) -> Union[pd.DataFrame, pd.Series]:
     k = len(data)
     k0, d, r0 = k // 2, k % 2, (k + 1) / 2
     rou = np.power(rate, 1 / (k0 - 1)) if k0 > 1 else 1

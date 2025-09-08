@@ -4,7 +4,7 @@ import pandas as pd
 from loguru import logger
 from typing import Literal
 from rich.progress import Progress, TaskID, TimeElapsedColumn, TimeRemainingColumn, TextColumn, BarColumn
-from husfort.qutility import check_and_makedirs, SFG
+from husfort.qutility import check_and_makedirs, SFG, qtimer
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qplot import CPlotLines
@@ -342,20 +342,28 @@ class COTTest(CVTTest):
         k = len(data)
         s = {}
         for factor in self.factor_grp.factor_names:
-            x0 = map_to_weight(data[factor], rate=1.00)
+            x0 = map_to_weight(data[factor], rate=0.25)
+            # data['x0'] = x0
+            # data[[factor, 'x0']].sort_values(by=[factor], ascending=False)
+            # breakpoint()
             optimizer = COptimizerPortfolioSharpe(
                 m=data[factor].to_numpy() * 0.01,
                 v=covariance.to_numpy(),
                 x0=x0.to_numpy(),
                 bounds=[(-3 / k, 3 / k)] * k,
-                tot_mkt_val_bds=(1.0, 1.0),
-                tol=1e-8,
+                tot_mkt_val_bds=(0.8, 1.2),
+                tol=1e-4,
+                using_jac=False,
+                verbose=False,
+                ignore_warnings=True,
             )
             res = optimizer.optimize()
             wv, fv = res.x, res.fun
             # print(pd.Series(wv).round(6))
-            # print(fv)
+            # print(f"sharpe(x0) = {optimizer.sharpe(x0.to_numpy()):.6f}")
+            # print(f"sharpe(wv) = {optimizer.sharpe(wv):.6f}")
             # print(np.sum(np.abs(wv)))
+            wv = wv / np.abs(wv).sum()
             # breakpoint()
             s[factor] = data[self.ret.ret_name] @ wv / self.ret.win
         s = pd.Series(s)
@@ -369,6 +377,7 @@ class COTTest(CVTTest):
 TICTestAuxArgs = tuple[TFactorsAvlbDirType, TTestReturnsAvlbDirType]
 
 
+@qtimer
 def main_qtests(
         rets: TRets,
         factor_grp: CCfgFactorGrp,

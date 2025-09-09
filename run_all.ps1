@@ -72,6 +72,25 @@ python main.py --bgn $bgn_date_qtest --stp $stp_date vt --fclass VENTROPY
 python main.py --bgn $bgn_date_qtest --stp $stp_date vt --fclass AMP
 python main.py --bgn $bgn_date_qtest --stp $stp_date vt --fclass LCVR
 
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass BASIS
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass TS
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass RS
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass MTM
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass SKEW
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass KURT
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass LIQUIDITY
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass SIZE
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass CTP
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass CVP
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass MPH
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass VAL
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass ACR
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass REOC
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass NPLS
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass VENTROPY
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass AMP
+python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass LCVR
+
 python main.py --bgn $bgn_date_sig_fac --stp $stp_date signals --type factors
 python main.py --bgn $bgn_date_opt --stp $stp_date optimize
 python main.py --bgn $bgn_date_sig_stg --stp $stp_date signals --type strategies

@@ -1,10 +1,11 @@
 import os
 import numpy as np
 import pandas as pd
+import multiprocessing as mp
 from loguru import logger
 from typing import Literal
 from rich.progress import Progress, TaskID, TimeElapsedColumn, TimeRemainingColumn, TextColumn, BarColumn
-from husfort.qutility import check_and_makedirs, SFG, qtimer
+from husfort.qutility import check_and_makedirs, SFG, qtimer, error_handler
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qplot import CPlotLines
@@ -148,7 +149,7 @@ class __CQTest:
         report.to_csv(report_path, float_format=float_format, index=saving_index)
         return 0
 
-    def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
+    def main_cal(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         buffer_bgn_date = calendar.get_next_date(bgn_date, -self.ret.shift)
         iter_dates = calendar.get_iter_list(buffer_bgn_date, stp_date)
         save_dates = iter_dates[self.ret.shift:]
@@ -193,6 +194,11 @@ class __CQTest:
         self.plot(plot_data=plot_data)
         report = self.gen_report(test_data)
         self.save_report(report, saving_index=False)
+        return 0
+
+    def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
+        self.main_cal(bgn_date, stp_date, calendar)
+        self.main_summary(bgn_date, stp_date)
         return 0
 
 
@@ -346,6 +352,7 @@ class COTTest(CVTTest):
             # data['x0'] = x0
             # data[[factor, 'x0']].sort_values(by=[factor], ascending=False)
             # breakpoint()
+            # (x0.min(), x0.max())
             optimizer = COptimizerPortfolioSharpe(
                 m=data[factor].to_numpy() * 0.01,
                 v=covariance.to_numpy(),
@@ -359,6 +366,7 @@ class COTTest(CVTTest):
             )
             res = optimizer.optimize()
             wv, fv = res.x, res.fun
+            # (res.x.min(), res.x.max())
             # print(pd.Series(wv).round(6))
             # print(f"sharpe(x0) = {optimizer.sharpe(x0.to_numpy()):.6f}")
             # print(f"sharpe(wv) = {optimizer.sharpe(wv):.6f}")
@@ -390,6 +398,7 @@ def main_qtests(
         calendar: CCalendar,
         test_type: Literal["ic", "vt", "ot"],
         volatility_adjusted: bool,
+        call_multiprocess: bool,
 ):
     extra_args = {}
     if test_type == "ic":
@@ -402,6 +411,7 @@ def main_qtests(
     else:
         raise ValueError("test_type must be in ['ic', 'vt', 'ot']")
 
+    tests: list[__CQTest] = []
     for ret in rets:
         for factors_avlb_dir, test_returns_avlb_dir in aux_args_list:
             kwargs = {
@@ -415,6 +425,23 @@ def main_qtests(
             }
             kwargs.update(extra_args)
             test = test_cls(**kwargs)
+            tests.append(test)
+
+    if call_multiprocess:
+        with mp.get_context("spawn").Pool() as pool:
+            for test in tests:
+                pool.apply_async(
+                    test.main,
+                    kwds={
+                        "bgn_date": bgn_date,
+                        "stp_date": stp_date,
+                        "calendar": calendar,
+                    },
+                    error_callback=error_handler,
+                )
+            pool.close()
+            pool.join()
+    else:
+        for test in tests:
             test.main(bgn_date, stp_date, calendar)
-            test.main_summary(bgn_date, stp_date)
     return 0

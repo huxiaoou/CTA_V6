@@ -243,6 +243,7 @@ if __name__ == "__main__":
             calendar=calendar,
             test_type=args.switch,
             volatility_adjusted=args.va,
+            call_multiprocess=not args.nomp,
         )
     elif args.switch == "signals":
         from solutions.signals import main_signals

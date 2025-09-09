@@ -233,7 +233,7 @@ class CICTest(__CQTest):
         if self.ret.win <= 1:
             ylim = (-40, 80)
         elif self.ret.win <= 5:
-            ylim = (-50, 100)
+            ylim = (-50, 120)
         elif self.ret.win <= 10:
             ylim = (-60, 120)
         else:
@@ -294,7 +294,7 @@ class CVTTest(__CQTest):
         )
 
     def get_plot_ylim(self) -> tuple[float, float]:
-        return -0.2, 0.6
+        return -0.2, 0.8
 
     def gen_report(self, test_data: pd.DataFrame, ret_scale: float = 100.0, ann_rate: float = 250) -> pd.DataFrame:
         test_data["trade_year"] = test_data.index.map(lambda z: z[0:4])

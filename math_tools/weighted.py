@@ -81,3 +81,35 @@ def wic(x: Union[pd.Series, np.ndarray], y: Union[pd.Series, np.ndarray], w: Uni
     else:
         print(f"{vxx=:.8f}, {vyy=:.8f}")
         return 0
+
+
+def dispersion(x: Union[pd.Series, np.ndarray]) -> float:
+    return x @ x - len(x) * x.mean() ** 2
+
+
+def decompose_dispersion(data: pd.DataFrame, ret: str = "ret", sector: str = "sector") -> tuple[float, float, float]:
+    n, m = len(data), data[ret].mean()
+    dp_tot = dispersion(data[ret])
+    res = []
+    for sec, sec_ret in data.groupby(by=sector)[ret]:
+        res.append({
+            "sector": sec,
+            "within": dispersion(sec_ret),
+            "between": len(sec_ret) * (sec_ret.mean() - m) ** 2
+        })
+    res = pd.DataFrame(res)
+    dp_within, dp_between = res["within"].sum(), res["between"].sum()
+    if abs(dp_tot - dp_within - dp_between) > 1e-2:
+        raise ValueError(f"total = {dp_tot:.4f}, within = {dp_within:.4f}, between = {dp_between:.4f}")
+    return dp_tot, dp_within, dp_between
+
+
+if __name__ == "__main__":
+    test_data = pd.DataFrame({
+        "ret": [1, 2, 3, 4, 5, 6, 7, 8],
+        "sector": list("abbcccdd"),
+    })
+    tot, within, between = decompose_dispersion(test_data)
+    print(f"tot     = {tot:>8.4f}")
+    print(f"within  = {within:>8.4f}")
+    print(f"between = {between:>8.4f}")

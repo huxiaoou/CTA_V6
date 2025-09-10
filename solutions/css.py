@@ -163,7 +163,9 @@ class CCrossSectionCalculator:
         new_data["vma"] = new_data["volatility"].rolling(window=self.cfg_css.vma_win).mean()
         new_data["sma"] = new_data["skewness"].rolling(window=self.cfg_css.vma_win).mean()
         new_data["kma"] = new_data["kurtosis"].rolling(window=self.cfg_css.vma_win).mean()
-        new_data["tot_wgt"] = new_data["vma"].map(lambda z: 1 if z < self.cfg_css.vma_threshold else 0.5)
+        new_data["tot_wgt"] = new_data["vma"].map(
+            lambda z: 1 if z < self.cfg_css.vma_threshold else self.cfg_css.vma_wgt
+        )
         # new_data["tot_wgt"] = 1
 
         # --- ratio-sev

@@ -183,6 +183,7 @@ icov:
 css:
   vma_win: 5
   vma_threshold: 0.0175
+  vma_wgt: 0.2
   sev_win: 20
 
 tst:
@@ -316,19 +317,19 @@ strategies:
       - [ RS, RS240PA ]
       - [ VAL, VALDIF ]
       - [ KURT, KURTDIF ]
-  #      - [ MTM, MTMDIF ]
-  #      - [ SKEW, SKEW060 ]
-  #      - [ LIQUIDITY, LIQUIDITY240 ]
-  #      - [ SIZE, SIZEDIF ]
-  #      - [ CTP, CTP060L95 ]
-  #      - [ CVP, CVP060L95 ]
-  #      - [ MPH, MPH060L80 ]
-  #      - [ ACR, ACRDIF ]
-  #      - [ REOC, REOCDIF ]
-  #      - [ NPLS, NPLSDIF ]
-  #      - [ VENTROPY, VENTROPY005 ]
-  #      - [ AMP, AMPDIF ]
-  #      - [ LCVR, LCVR020 ]
+      - [ LIQUIDITY, LIQUIDITY240 ]
+    #      - [ MTM, MTMDIF ]
+    #      - [ SKEW, SKEW060 ]
+    #      - [ SIZE, SIZEDIF ]
+    #      - [ CTP, CTP060L95 ]
+    #      - [ CVP, CVP060L95 ]
+    #      - [ MPH, MPH060L80 ]
+    #      - [ ACR, ACRDIF ]
+    #      - [ REOC, REOCDIF ]
+    #      - [ NPLS, NPLSDIF ]
+    #      - [ VENTROPY, VENTROPY005 ]
+    #      - [ AMP, AMPDIF ]
+    #      - [ LCVR, LCVR020 ]
   - name: s1
     opt_win: 20
     ret: Cls005L1
@@ -337,19 +338,19 @@ strategies:
       - [ RS, RS240PA ]
       - [ VAL, VALDIF ]
       - [ KURT, KURTDIF ]
-  #      - [ MTM, MTMDIF ]
-  #      - [ SKEW, SKEW060 ]
-  #      - [ LIQUIDITY, LIQUIDITY240 ]
-  #      - [ SIZE, SIZEDIF ]
-  #      - [ CTP, CTP060L95 ]
-  #      - [ CVP, CVP060L95 ]
-  #      - [ MPH, MPH060L80 ]
-  #      - [ ACR, ACRDIF ]
-  #      - [ REOC, REOCDIF ]
-  #      - [ NPLS, NPLSDIF ]
-  #      - [ VENTROPY, VENTROPY005 ]
-  #      - [ AMP, AMPDIF ]
-  #      - [ LCVR, LCVR020 ]
+      - [ LIQUIDITY, LIQUIDITY240 ]
+    #      - [ MTM, MTMDIF ]
+    #      - [ SKEW, SKEW060 ]
+    #      - [ SIZE, SIZEDIF ]
+    #      - [ CTP, CTP060L95 ]
+    #      - [ CVP, CVP060L95 ]
+    #      - [ MPH, MPH060L80 ]
+    #      - [ ACR, ACRDIF ]
+    #      - [ REOC, REOCDIF ]
+    #      - [ NPLS, NPLSDIF ]
+    #      - [ VENTROPY, VENTROPY005 ]
+    #      - [ AMP, AMPDIF ]
+    #      - [ LCVR, LCVR020 ]
 
 # ------- models -------
 portfolios:

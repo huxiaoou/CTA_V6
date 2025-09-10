@@ -290,7 +290,7 @@ if __name__ == "__main__":
             bgn_date=bgn_date,
             stp_date=stp_date,
             calendar=calendar,
-            method="VT",
+            method="EQ",
             optimize_dir=proj_cfg.optimize_dir,
             vt_tests_dir=proj_cfg.vt_tests_dir,
         )

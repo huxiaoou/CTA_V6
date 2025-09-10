@@ -186,5 +186,7 @@ def main_optimize(
                 vt_tests_dir=vt_tests_dir,
                 volatility_adjusted=False,
             )
+        else:
+            raise ValueError(f"Invalid method: {method}")
         optimizer.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
         logger.info(f"Optimizing strategy {SFG(strategy.name)} finished.")

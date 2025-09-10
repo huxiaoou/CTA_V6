@@ -9,11 +9,10 @@ from husfort.qutility import check_and_makedirs, SFG, qtimer, error_handler
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qplot import CPlotLines
-from husfort.qoptimization import COptimizerPortfolioSharpe
 from typedefs.typedefReturns import CRet, TRets
 from typedefs.typedefFactors import CCfgFactorGrp
 from typedef import TFactorsAvlbDirType, TTestReturnsAvlbDirType
-from math_tools.weighted import gen_exp_wgt, wic, map_to_weight
+from math_tools.weighted import gen_exp_wgt, wic
 from solutions.test_return import CTestReturnLoader
 from solutions.factor import CFactorsLoader
 from solutions.shared import gen_ic_tests_db, gen_vt_tests_db
@@ -346,34 +345,22 @@ class COTTest(CVTTest):
         instruments = data["instrument"].tolist()
         covariance = self.get_cov_at_trade_date(trade_date, instruments)
         k = len(data)
+        k0 = k // 2
+        wgt = gen_exp_wgt(k=k, rate=1.00)
         s = {}
         for factor in self.factor_grp.factor_names:
-            x0 = map_to_weight(data[factor], rate=0.25)
-            # data['x0'] = x0
-            # data[[factor, 'x0']].sort_values(by=[factor], ascending=False)
-            # breakpoint()
-            # (x0.min(), x0.max())
-            optimizer = COptimizerPortfolioSharpe(
-                m=data[factor].to_numpy() * 0.01,
-                v=covariance.to_numpy(),
-                x0=x0.to_numpy(),
-                bounds=[(-3 / k, 3 / k)] * k,
-                tot_mkt_val_bds=(0.8, 1.2),
-                tol=1e-4,
-                using_jac=False,
-                verbose=False,
-                ignore_warnings=True,
-            )
-            res = optimizer.optimize()
-            wv, fv = res.x, res.fun
-            # (res.x.min(), res.x.max())
-            # print(pd.Series(wv).round(6))
-            # print(f"sharpe(x0) = {optimizer.sharpe(x0.to_numpy()):.6f}")
-            # print(f"sharpe(wv) = {optimizer.sharpe(wv):.6f}")
-            # print(np.sum(np.abs(wv)))
-            wv = wv / np.abs(wv).sum()
-            # breakpoint()
-            s[factor] = data[self.ret.ret_name] @ wv / self.ret.win
+            factor_data = data[[factor, "instrument", self.ret.ret_name]].sort_values(by=factor, ascending=False)
+            top_list = factor_data["instrument"].head(k0).tolist()
+            btm_list = factor_data["instrument"].tail(k0).tolist()
+            cov_top = covariance.loc[top_list, top_list]
+            cov_btm = covariance.loc[btm_list, btm_list]
+            w0 = wgt.copy()
+            w_top, w_btm = w0[0:k0], w0[-k0:]
+            var_top, var_btm = w_top @ cov_top @ w_top, w_btm @ cov_btm @ w_btm
+            top_btm_ratio = np.sqrt(var_top / var_btm)
+            w0[-k0:] = w0[-k0:] * top_btm_ratio
+            w0 = w0 / np.sum(np.abs(w0))
+            s[factor] = factor_data[self.ret.ret_name] @ w0 / self.ret.win
         s = pd.Series(s)
         pb.update(task_id=task, advance=1)
         return s

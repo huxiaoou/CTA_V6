@@ -5,7 +5,7 @@ from husfort.qevaluation import CNAV
 from husfort.qsqlite import CMgrSqlDb
 from husfort.qsimulation import gen_nav_db
 from husfort.qutility import check_and_makedirs
-from husfort.qplot import CPlotLines
+from husfort.qplot import CPlotLinesWithBars
 from typedefs.typedefStrategies import CStrategy, CPortfolio
 
 
@@ -37,13 +37,23 @@ def evl_sim(sim_id: str, sim_save_dir: str, evl_save_dir: str) -> dict:
     summary_by_id_plt_dir = os.path.join(evl_save_dir, "by_id_plt")
     check_and_makedirs(summary_by_id_plt_dir)
     ret_data["nav"] = (ret_data["ret"] + 1).cumprod()
-    artist = CPlotLines(
-        plot_data=ret_data[["nav"]],
+    ret_data["drawdown"] = (1 - ret_data["nav"] / ret_data["nav"].cummax()) * 100
+    artist = CPlotLinesWithBars(
+        plot_data=ret_data[["nav", "drawdown"]],
+        line_cols=["nav"],
+        bar_cols=["drawdown"],
+        line_width=1.0,
+        line_color=["#800000"],
+        bar_color=["#1E90FF"],
+        bar_alpha=0.6,
         fig_name=f"{sim_id}",
         fig_save_dir=summary_by_id_plt_dir,
     )
     artist.plot()
-    artist.set_axis_x(xtick_count=12)
+    artist.set_axis_x(xtick_count=20, xtick_label_size=8, xgrid_visible=True)
+    artist.set_axis_y(ylim=(0.95, 2.50), ygrid_visible=True)
+    artist.set_secondary_y_axis(ylim=(0, 20))
+    artist.set_legend(loc="upper left")
     artist.save_and_close()
 
     # all sum

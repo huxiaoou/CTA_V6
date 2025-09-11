@@ -6,7 +6,7 @@ from loguru import logger
 from husfort.qutility import check_and_makedirs, SFG
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
-from math_tools.weighted import weighted_volatility
+from math_tools.weighted import weighted_volatility, decompose_dispersion
 from typedef import CCfgCss
 
 
@@ -46,16 +46,19 @@ class CCrossSectionCalculator:
         return mkt_idx_data
 
     @staticmethod
-    def cal_cs_vol(data: pd.DataFrame, ret: str = "return", amt: str = "amount") -> pd.Series:
+    def cal_css(data: pd.DataFrame, ret: str = "return", amt: str = "amount", sector: str = "sectorL1") -> pd.Series:
         """
 
         :param data: columns contains [ret, amt] at least
         :param ret:
         :param amt:
+        :param sector:
         :return:
         """
+        tot, within, between = decompose_dispersion(data=data, ret=ret, sector=sector)
         d = {
             "volatility": weighted_volatility(x=data[ret], wgt=data[amt]),
+            "dispersion": within / tot,
             "skewness": data[ret].skew(),
             "kurtosis": data[ret].kurtosis(),
         }
@@ -82,6 +85,7 @@ class CCrossSectionCalculator:
         save_data = new_data[self.db_struct_css.table.vars.names]
         if sqldb.check_continuity(bgn_date, calendar) == 0:
             sqldb.update(update_data=save_data)
+        return 0
 
     @property
     def rename_mapper(self) -> dict:
@@ -157,10 +161,11 @@ class CCrossSectionCalculator:
         mkt_idx_data["volatility_sector"] = mkt_idx_data[self.sectors].std(axis=1).rolling(window=5).mean()
 
         # --- general sector statistics
-        css = avlb_data.groupby(by="trade_date").apply(self.cal_cs_vol)
+        css = avlb_data.groupby(by="trade_date").apply(self.cal_css)
         css[self.sectors] = css[self.sectors].rolling(window=self.cfg_css.vma_win).mean()
         new_data = css.reset_index().rename(columns=self.rename_mapper)
         new_data["vma"] = new_data["volatility"].rolling(window=self.cfg_css.vma_win).mean()
+        new_data["dma"] = new_data["dispersion"].rolling(window=self.cfg_css.vma_win).mean()
         new_data["sma"] = new_data["skewness"].rolling(window=self.cfg_css.vma_win).mean()
         new_data["kma"] = new_data["kurtosis"].rolling(window=self.cfg_css.vma_win).mean()
         new_data["tot_wgt"] = new_data["vma"].map(

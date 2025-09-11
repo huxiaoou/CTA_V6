@@ -99,7 +99,7 @@ def decompose_dispersion(data: pd.DataFrame, ret: str = "ret", sector: str = "se
         })
     res = pd.DataFrame(res)
     dp_within, dp_between = res["within"].sum(), res["between"].sum()
-    if abs(dp_tot - dp_within - dp_between) > 1e-2:
+    if abs(dp_tot - dp_within - dp_between) > 1e-6:
         raise ValueError(f"total = {dp_tot:.4f}, within = {dp_within:.4f}, between = {dp_between:.4f}")
     return dp_tot, dp_within, dp_between
 

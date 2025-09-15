@@ -193,7 +193,7 @@ tst:
 # ------- factors -------
 factor_decay_default:
   rate: 1.0
-  win: 1
+  win: 5
 factors:
   BASIS:
     args:

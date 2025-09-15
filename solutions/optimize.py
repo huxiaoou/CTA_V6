@@ -175,7 +175,7 @@ class COptimizerForStrategyOT(COptimizerForStrategyVT):
             m=m.to_numpy(),
             v=v.to_numpy(),
             x0=x0,
-            bounds=[(1 / 2 / k, 2 / k)] * k,
+            bounds=[(1 / 3 / k, 3 / k)] * k,
             tot_mkt_val_bds=(0.9, 1.1),
             verbose=True,
         )

@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from typing import Literal
 from rich.progress import track
@@ -5,6 +6,7 @@ from husfort.qlog import logger
 from husfort.qcalendar import CCalendar
 from husfort.qsqlite import CMgrSqlDb
 from husfort.qutility import check_and_makedirs, SFG
+from husfort.qoptimization import COptimizerPortfolioSharpe
 from typedefs.typedefFactors import CFactor
 from typedefs.typedefStrategies import CStrategy
 from solutions.shared import gen_optimize_db, gen_vt_tests_db
@@ -162,6 +164,32 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
         return opt_wgt
 
 
+class COptimizerForStrategyOT(COptimizerForStrategyVT):
+    @staticmethod
+    def optimizer(rets: pd.DataFrame) -> pd.Series:
+        k = rets.shape[1]
+        v = rets.cov()
+        m = rets.mean()
+        x0 = np.ones(k) / k
+        optimizer = COptimizerPortfolioSharpe(
+            m=m.to_numpy(),
+            v=v.to_numpy(),
+            x0=x0,
+            bounds=[(1 / 2 / k, 2 / k)] * k,
+            tot_mkt_val_bds=(0.9, 1.1),
+            verbose=True,
+        )
+        res = optimizer.optimize()
+        if not res.success:
+            print(f"Not successful optimization")
+            w = pd.Series(data=x0, index=rets.columns)
+        else:
+            w = pd.Series(data=res.x, index=rets.columns)
+        optimizer.sharpe(x0)
+        optimizer.sharpe(res.x)
+        return w / w.abs().sum()
+
+
 # ------------
 # --- main ---
 # ------------
@@ -169,7 +197,7 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
 def main_optimize(
         strategies: list[CStrategy],
         bgn_date: str, stp_date: str, calendar: CCalendar,
-        method: Literal["EQ", "VT"],
+        method: Literal["EQ", "VT", "OT"],
         optimize_dir: str,
         vt_tests_dir: str,
 ):
@@ -181,6 +209,13 @@ def main_optimize(
             )
         elif method == "VT":
             optimizer = COptimizerForStrategyVT(
+                strategy=strategy,
+                optimize_dir=optimize_dir,
+                vt_tests_dir=vt_tests_dir,
+                volatility_adjusted=False,
+            )
+        elif method == "OT":
+            optimizer = COptimizerForStrategyOT(
                 strategy=strategy,
                 optimize_dir=optimize_dir,
                 vt_tests_dir=vt_tests_dir,

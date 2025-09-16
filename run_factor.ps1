@@ -15,8 +15,8 @@ if (Test-Path $factor_dir)
 {
     Remove-Item $factor_dir -Recurse
 }
-Remove-Item "$proj_dir\factors_avlb_raw\$factor.db"
-Remove-Item "$proj_dir\factors_avlb_ewa\$factor.db"
+Remove-Item "$proj_dir\factors_avlb_raw\$factor-*.db"
+Remove-Item "$proj_dir\factors_avlb_ewa\$factor-*.db"
 
 Remove-Item "$proj_dir\ic_tests\data\$factor-*.db"
 Remove-Item "$proj_dir\ic_tests\plots\$factor-*.pdf"

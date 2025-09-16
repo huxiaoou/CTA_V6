@@ -96,7 +96,7 @@ class CSignalsFactors(CSignals):
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         factor_data = self.load_factors(bgn_date, stp_date)
         grp_data = factor_data.groupby(by="trade_date", group_keys=False)
-        weight_data = grp_data[self.factor_grp.factor_names].apply(map_to_weight)
+        weight_data = grp_data[self.factor_grp.factor_names].apply(map_to_weight, rate=1.0)
         save_data = pd.merge(
             left=factor_data[["trade_date", "instrument"]],
             right=weight_data,

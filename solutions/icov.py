@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from husfort.qutility import check_and_makedirs, SFG
 from husfort.qcalendar import CCalendar
@@ -89,3 +90,14 @@ class CICOV(CICOVReader):
         self.save(icov, bgn_date, calendar)
         logger.info(f"instruments covariance from {SFG(bgn_date)} to {SFG(stp_date)} calculated")
         return 0
+
+
+def get_cov_at_trade_date(icov_data: pd.DataFrame, trade_date: str, instruments: list[str]) -> pd.DataFrame:
+    trade_date_icov = icov_data.query(f"trade_date == '{trade_date}'")
+    partial_cov = trade_date_icov.pivot(
+        index="instrument0", columns="instrument1", values="cov",
+    ).fillna(0).loc[instruments, instruments]
+    variance = pd.DataFrame(data=np.diag(np.diag(partial_cov)), index=partial_cov.index,
+                            columns=partial_cov.columns)
+    instrus_cov = partial_cov + partial_cov.T - variance
+    return instrus_cov

@@ -1,5 +1,7 @@
+import numpy as np
 import pandas as pd
 import multiprocessing as mp
+from typing import Final
 from rich.progress import Progress, track
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
@@ -9,6 +11,8 @@ from typedefs.typedefStrategies import CStrategy
 from solutions.factor import CFactorsLoader
 from solutions.optimize import COptimizerForStrategyReader
 from solutions.shared import gen_sig_fac_db, gen_sig_strategy_db
+from solutions.icov import get_cov_at_trade_date
+from math_tools.weighted import gen_exp_wgt
 from math_tools.weighted import map_to_weight, adjust_weights
 
 
@@ -73,10 +77,12 @@ class CSignalsFactors(CSignals):
             factor_grp: CCfgFactorGrp,
             factors_avlb_dir: str,
             signals_factors_dir: str,
+            icov_data: pd.DataFrame,
     ):
         super().__init__(signals_dir=signals_factors_dir, signal_id=factor_grp.factor_class)
         self.factor_grp = factor_grp
         self.factors_avlb_dir = factors_avlb_dir
+        self.icov_data: Final[pd.DataFrame] = icov_data
 
     def load_factors(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
         factors_loader = CFactorsLoader(
@@ -93,15 +99,38 @@ class CSignalsFactors(CSignals):
             factors=self.factor_grp.factors,
         )
 
+    def core(self, data: pd.DataFrame, rate: float) -> pd.DataFrame:
+        trade_date = data["trade_date"].iloc[0]
+        instruments = data["instrument"].tolist()
+        covariance = get_cov_at_trade_date(self.icov_data, trade_date, instruments)
+        k = len(data)
+        k0 = k // 2
+        wgt = gen_exp_wgt(k=k, rate=rate)
+        res = {}
+        for factor in self.factor_grp.factor_names:
+            factor_data = data[[factor, "instrument"]].sort_values(by=factor, ascending=False)
+            top_list = factor_data["instrument"].head(k0).tolist()
+            btm_list = factor_data["instrument"].tail(k0).tolist()
+            cov_top = covariance.loc[top_list, top_list]
+            cov_btm = covariance.loc[btm_list, btm_list]
+            w0 = wgt.copy()
+            w_top, w_btm = w0[0:k0], w0[-k0:]
+            var_top, var_btm = w_top @ cov_top @ w_top, w_btm @ cov_btm @ w_btm
+            top_btm_ratio = np.sqrt(var_top / var_btm)
+            w0[-k0:] = w0[-k0:] * top_btm_ratio
+            w0 = w0 / np.sum(np.abs(w0))
+            res[factor] = pd.Series(data=w0, index=factor_data["instrument"])
+        res = pd.DataFrame(res)
+        return res
+
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         factor_data = self.load_factors(bgn_date, stp_date)
-        grp_data = factor_data.groupby(by="trade_date", group_keys=False)
-        weight_data = grp_data[self.factor_grp.factor_names].apply(map_to_weight, rate=1.0)
+        weight_data = factor_data.groupby(by="trade_date").apply(self.core, rate=1.0)  # type:ignore
+        weight_data = weight_data.reset_index()
         save_data = pd.merge(
             left=factor_data[["trade_date", "instrument"]],
             right=weight_data,
-            left_index=True,
-            right_index=True,
+            on=["trade_date", "instrument"],
             how="left",
         )
         self.save(save_data, calendar)
@@ -258,12 +287,14 @@ def gen_signals_from_factors(
         factor_cfgs: list[CCfgFactorGrp],
         factors_avlb_dir: str,
         signals_factors_dir: str,
+        icov_data: pd.DataFrame,
 ) -> list[CSignalsFactors]:
     return [
         CSignalsFactors(
             factor_grp=z,
             factors_avlb_dir=factors_avlb_dir,
             signals_factors_dir=signals_factors_dir,
+            icov_data=icov_data,
         )
         for z in factor_cfgs
     ]

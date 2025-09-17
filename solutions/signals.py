@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import multiprocessing as mp
 from typing import Final
-from rich.progress import Progress, track
+from rich.progress import Progress, track, TaskID, TimeElapsedColumn, TimeRemainingColumn, TextColumn, BarColumn
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qutility import check_and_makedirs, error_handler
@@ -99,7 +99,7 @@ class CSignalsFactors(CSignals):
             factors=self.factor_grp.factors,
         )
 
-    def core(self, data: pd.DataFrame, rate: float) -> pd.DataFrame:
+    def core(self, data: pd.DataFrame, rate: float, pb: Progress, task: TaskID) -> pd.DataFrame:
         trade_date = data["trade_date"].iloc[0]
         instruments = data["instrument"].tolist()
         covariance = get_cov_at_trade_date(self.icov_data, trade_date, instruments)
@@ -121,11 +121,22 @@ class CSignalsFactors(CSignals):
             w0 = w0 / np.sum(np.abs(w0))
             res[factor] = pd.Series(data=w0, index=factor_data["instrument"])
         res = pd.DataFrame(res)
+        pb.update(task_id=task, advance=1)
         return res
 
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         factor_data = self.load_factors(bgn_date, stp_date)
-        weight_data = factor_data.groupby(by="trade_date").apply(self.core, rate=1.0)  # type:ignore
+        with Progress(
+                TextColumn("{task.description}"),
+                BarColumn(),
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
+        ) as pb:
+            task = pb.add_task(description=self.signal_id)
+            pb.update(task_id=task, completed=0, total=len(factor_data["trade_date"].unique()))
+            weight_data = factor_data.groupby(by="trade_date").apply(  # type:ignore
+                self.core, rate=1.0, pb=pb, task=task,
+            )
         weight_data = weight_data.reset_index()
         save_data = pd.merge(
             left=factor_data[["trade_date", "instrument"]],

@@ -157,18 +157,18 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
         sg = np.sign(rets.mean())
         w = sg / sd
         x0 = (w / w.abs().sum()).to_numpy()
-        k = rets.shape[1]
+        bounds = [(z * 0.8, z * 1.2) if z > 0 else (z * 1.2, z * 0.8) for z in x0]
         optimizer = COptimizerPortfolioSharpe(
             m=rets.mean().to_numpy(),
             v=rets.cov().to_numpy(),
             x0=x0,
-            bounds=[(-2 / k, 2 / k)] * k,
+            bounds=bounds,
             tot_mkt_val_bds=(0.90, 1.10),
         )
         res = optimizer.optimize()
         w = pd.Series(data=res.x, index=rets.columns)
-        optimizer.sharpe(x0)
-        optimizer.sharpe(res.x)
+        if optimizer.sharpe(x0) >= optimizer.sharpe(res.x):
+            logger.warning("Optimization failed.")
         return w / w.abs().sum()
 
     def optimize_at_day(self, trade_date: str, calendar: CCalendar) -> pd.Series:

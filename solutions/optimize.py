@@ -152,10 +152,10 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
 
     @staticmethod
     def optimizer(rets: pd.DataFrame) -> pd.Series:
-        # sd = rets.std()
-        # sg = np.sign(rets.mean())
-        # w = sg / sd
-        w = np.sign(rets.mean())
+        sd = rets.std()
+        sg = np.sign(rets.mean())
+        w = sg / sd
+        # w = np.sign(rets.mean())
         return w / w.abs().sum()
 
     def optimize_at_day(self, trade_date: str, calendar: CCalendar) -> pd.Series:

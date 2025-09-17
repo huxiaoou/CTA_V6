@@ -1,14 +1,14 @@
 param (
     [Parameter(Mandatory = $true)]
+    [string]$bgn_date_factor,
+    [string]$bgn_date_qtest,
+    [string]$stp_date,
     [string]$factor
 )
 
 $proj_dir = "E:\Data\Projects\CTA_V6"
-$bgn_date_factor = "20140102"
-$bgn_date_qtest = "20150105"
-$stp_date = "20250801"
 
-Write-Host "Run for $factor"
+Write-Host "Run for $factor, factor = $bgn_date_factor, qtest = $bgn_date_qtest, stp = $stp_date"
 
 $factor_dir = "$proj_dir\factors_by_instru\$factor"
 if (Test-Path $factor_dir)

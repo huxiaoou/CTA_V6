@@ -6,6 +6,7 @@ from husfort.qlog import logger
 from husfort.qcalendar import CCalendar
 from husfort.qsqlite import CMgrSqlDb
 from husfort.qutility import check_and_makedirs, SFG
+from husfort.qoptimization import COptimizerPortfolioSharpe
 from typedefs.typedefFactors import CFactor
 from typedefs.typedefStrategies import CStrategy
 from solutions.shared import gen_optimize_db, gen_vt_tests_db
@@ -155,7 +156,19 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
         sd = rets.std()
         sg = np.sign(rets.mean())
         w = sg / sd
-        # w = np.sign(rets.mean())
+        x0 = (w / w.abs().sum()).to_numpy()
+        k = rets.shape[1]
+        optimizer = COptimizerPortfolioSharpe(
+            m=rets.mean().to_numpy(),
+            v=rets.cov().to_numpy(),
+            x0=x0,
+            bounds=[(-2 / k, 2 / k)] * k,
+            tot_mkt_val_bds=(0.90, 1.10),
+        )
+        res = optimizer.optimize()
+        w = pd.Series(data=res.x, index=rets.columns)
+        optimizer.sharpe(x0)
+        optimizer.sharpe(res.x)
         return w / w.abs().sum()
 
     def optimize_at_day(self, trade_date: str, calendar: CCalendar) -> pd.Series:

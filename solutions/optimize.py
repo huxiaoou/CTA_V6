@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from typing import Literal
 from rich.progress import track
@@ -151,9 +152,11 @@ class COptimizerForStrategyVT(__COptimizerForStrategy):
 
     @staticmethod
     def optimizer(rets: pd.DataFrame) -> pd.Series:
-        sd = rets.std()
-        w = 1 / sd
-        return w / w.sum()
+        # sd = rets.std()
+        # sg = np.sign(rets.mean())
+        # w = sg / sd
+        w = np.sign(rets.mean())
+        return w / w.abs().sum()
 
     def optimize_at_day(self, trade_date: str, calendar: CCalendar) -> pd.Series:
         opt_bgn_date = calendar.get_next_date(trade_date, shift=-self.strategy.opt_win + 1)

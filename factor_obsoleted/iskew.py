@@ -37,7 +37,7 @@ class CFactorISKEW(CFactorsByInstru):
         minb_data["simple"] = robust_ret_alg(minb_data["close"], minb_data["pre_close"], scale=1e4)
         iskew = minb_data.groupby(by="trade_date")["simple"].skew()
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
-            maj_data[name_vanilla] = iskew.rolling(win).sum()
+            maj_data[name_vanilla] = -iskew.rolling(win).sum()
         w0, w1 = 240, 20
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         maj_data[self.cfg.name_diff()] = maj_data[n0] * np.sqrt(w1 / w0) - maj_data[n1]

@@ -266,7 +266,6 @@ if __name__ == "__main__":
                 signals_factors_dir=proj_cfg.signals_factors_dir,
                 icov_data=icov_data,
             )
-
         elif args.type == "strategies":
             from solutions.signals import gen_signals_from_strategies
 
@@ -280,7 +279,6 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError(f"Invalid argument 'type' value: {args.type}")
-
         main_signals(
             signals=signals,
             bgn_date=bgn_date,

@@ -7,17 +7,23 @@ param (
     [Switch]$DisableMP
 )
 
+function CheckExistenceRemove {
+    param (
+        [string]$TargetPath
+    )
+
+    if (Test-Path $TargetPath) {
+        Remove-Item $TargetPath -Recurse
+    }
+}
+
 $proj_dir = "E:\Data\Projects\CTA_V6"
 
 Write-Host "Run for $factor, factor = $bgn_date_factor, qtest = $bgn_date_qtest, stp = $stp_date"
 
-$factor_dir = "$proj_dir\factors_by_instru\$factor"
-if (Test-Path $factor_dir)
-{
-    Remove-Item $factor_dir -Recurse
-}
-Remove-Item "$proj_dir\factors_avlb_raw\$factor-*.db"
-Remove-Item "$proj_dir\factors_avlb_ewa\$factor-*.db"
+CheckExistenceRemove("$proj_dir\factors_by_instru\$factor")
+CheckExistenceRemove("$proj_dir\factors_avlb_raw\$factor.db")
+CheckExistenceRemove("$proj_dir\factors_avlb_ewa\$factor.db")
 
 Remove-Item "$proj_dir\ic_tests\data\$factor-*.db"
 Remove-Item "$proj_dir\ic_tests\plots\$factor-*.pdf"

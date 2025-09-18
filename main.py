@@ -249,32 +249,30 @@ if __name__ == "__main__":
         from solutions.signals import main_signals
 
         if args.type == "factors":
-            import pandas as pd
             from solutions.signals import gen_signals_from_factors
-            from solutions.icov import CICOVReader
-
-            icov_reader = CICOVReader(icov_db_dir=proj_cfg.instru_covar_dir)
-            icov_data: pd.DataFrame = icov_reader.read(
-                bgn_date=bgn_date,
-                stp_date=stp_date,
-            )
 
             desc = "Calculate signals from factors"
             signals = gen_signals_from_factors(
                 factor_cfgs=cfg_factors.get_cfgs(),
                 factors_avlb_dir=proj_cfg.factors_avlb_ewa_dir,
                 signals_factors_dir=proj_cfg.signals_factors_dir,
-                icov_data=icov_data,
             )
         elif args.type == "strategies":
             from solutions.signals import gen_signals_from_strategies
+            from solutions.icov import CICOVReader
 
+            icov_reader = CICOVReader(icov_db_dir=proj_cfg.instru_covar_dir)
+            icov_data = icov_reader.read(
+                bgn_date=bgn_date,
+                stp_date=stp_date,
+            )
             desc = "Calculate signals from strategies"
             signals = gen_signals_from_strategies(
                 strategies=proj_cfg.strategies,
                 signals_strategies_dir=proj_cfg.signals_strategies_dir,
                 signals_factors_dir=proj_cfg.signals_factors_dir,
                 optimize_dir=proj_cfg.optimize_dir,
+                icov_data=icov_data,
                 db_struct_css=db_struct_css,
             )
         else:

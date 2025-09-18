@@ -6,7 +6,7 @@ from typing import Union
 def adjust_weights(raw_weights: pd.DataFrame, tot_wgt: pd.DataFrame, weight: str = "weight") -> pd.DataFrame:
     """
 
-    :param raw_weights: a pd.DataFrame with columns at least: ["trade_date", "weight"]
+    :param raw_weights: a pd.DataFrame with columns at least: ["trade_date", "instrument", "weight"]
     :param tot_wgt: a pd.DataFrame with columns at least: ["trade_date", "tot_wgt"]
     :param weight: a str representing the raw weight to be adjusted
     :return:

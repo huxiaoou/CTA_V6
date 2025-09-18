@@ -13,7 +13,7 @@ from solutions.optimize import COptimizerForStrategyReader
 from solutions.shared import gen_sig_fac_db, gen_sig_strategy_db
 from solutions.icov import get_cov_at_trade_date
 from math_tools.weighted import gen_exp_wgt
-from math_tools.weighted import map_to_weight, adjust_weights
+from math_tools.weighted import adjust_weights
 
 
 class CSignals:
@@ -77,12 +77,10 @@ class CSignalsFactors(CSignals):
             factor_grp: CCfgFactorGrp,
             factors_avlb_dir: str,
             signals_factors_dir: str,
-            icov_data: pd.DataFrame,
     ):
         super().__init__(signals_dir=signals_factors_dir, signal_id=factor_grp.factor_class)
         self.factor_grp = factor_grp
         self.factors_avlb_dir = factors_avlb_dir
-        self.icov_data: Final[pd.DataFrame] = icov_data
 
     def load_factors(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
         factors_loader = CFactorsLoader(
@@ -100,26 +98,11 @@ class CSignalsFactors(CSignals):
         )
 
     def core(self, data: pd.DataFrame, rate: float, pb: Progress, task: TaskID) -> pd.DataFrame:
-        trade_date = data["trade_date"].iloc[0]
-        instruments = data["instrument"].tolist()
-        covariance = get_cov_at_trade_date(self.icov_data, trade_date, instruments)
-        k = len(data)
-        k0 = k // 2
-        wgt = gen_exp_wgt(k=k, rate=rate)
+        wgt = gen_exp_wgt(k=len(data), rate=rate)
         res = {}
         for factor in self.factor_grp.factor_names:
             factor_data = data[[factor, "instrument"]].sort_values(by=factor, ascending=False)
-            top_list = factor_data["instrument"].head(k0).tolist()
-            btm_list = factor_data["instrument"].tail(k0).tolist()
-            cov_top = covariance.loc[top_list, top_list]
-            cov_btm = covariance.loc[btm_list, btm_list]
-            w0 = wgt.copy()
-            w_top, w_btm = w0[0:k0], w0[-k0:]
-            var_top, var_btm = w_top @ cov_top @ w_top, w_btm @ cov_btm @ w_btm
-            top_btm_ratio = np.sqrt(var_top / var_btm)
-            w0[-k0:] = w0[-k0:] * top_btm_ratio
-            w0 = w0 / np.sum(np.abs(w0))
-            res[factor] = pd.Series(data=w0, index=factor_data["instrument"])
+            res[factor] = pd.Series(data=wgt, index=factor_data["instrument"])
         res = pd.DataFrame(res)
         pb.update(task_id=task, advance=1)
         return res
@@ -155,12 +138,14 @@ class CSignalsStrategy(CSignals):
             signals_strategies_dir: str,
             signals_factors_dir: str,
             optimize_dir: str,
+            icov_data: pd.DataFrame,
             db_struct_css: CDbStruct,
     ):
         super().__init__(signals_dir=signals_strategies_dir, signal_id=strategy.name)
         self.strategy = strategy
         self.signals_factors_dir = signals_factors_dir
         self.optimize_dir = optimize_dir
+        self.icov_data: Final[pd.DataFrame] = icov_data
         self.db_struct_css = db_struct_css
 
     def get_buffer_bgn_date(self, bgn_date: str, calendar: CCalendar) -> str:
@@ -244,6 +229,27 @@ class CSignalsStrategy(CSignals):
         data = sqldb.read_by_range(bgn_date, stp_date)
         return data
 
+    def core(self, data: pd.DataFrame, pb: Progress = None, task: TaskID = None, weight: str = "weight") -> pd.Series:
+        trade_date = data["trade_date"].iloc[0]
+        instruments = data["instrument"].tolist()
+        covariance = get_cov_at_trade_date(self.icov_data, trade_date, instruments)
+        k = len(data)
+        factor_data = data[[weight, "instrument"]].sort_values(by=weight, ascending=False)
+        w0 = factor_data["weight"].to_numpy()
+        k0 = k // 2
+        top_list = factor_data["instrument"].head(k0).tolist()
+        btm_list = factor_data["instrument"].tail(k0).tolist()
+        cov_top = covariance.loc[top_list, top_list]
+        cov_btm = covariance.loc[btm_list, btm_list]
+        w_top, w_btm = w0[0:k0], w0[-k0:]
+        var_top, var_btm = w_top @ cov_top @ w_top, w_btm @ cov_btm @ w_btm
+        top_btm_ratio = np.sqrt(var_top / var_btm)
+        w0[-k0:] = w0[-k0:] * top_btm_ratio
+        w0 = w0 / np.sum(np.abs(w0))
+        res = pd.Series(data=w0, index=factor_data["instrument"]).sort_index()
+        pb.update(task_id=task, advance=1)
+        return res
+
     def main(self, bgn_date: str, stp_date: str, calendar: CCalendar):
         buffer_bgn_date = self.get_buffer_bgn_date(bgn_date, calendar)
         signals_factors = self.load_signals_factors(buffer_bgn_date, stp_date)
@@ -251,8 +257,18 @@ class CSignalsStrategy(CSignals):
         opt_wgt = self.load_opt_wgt_for_factors(buffer_bgn_date, stp_date)
         raw_weights = self.cal_wgt_strategy(signals_ma, opt_wgt)
         raw_weights = raw_weights.query(f"trade_date >= '{bgn_date}'")
+        with Progress(
+                TextColumn("{task.description}"),
+                BarColumn(),
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
+        ) as pb:
+            task = pb.add_task(description=self.signal_id)
+            pb.update(task_id=task, completed=0, total=len(raw_weights["trade_date"].unique()))
+            vol_adj_weights = raw_weights.groupby(by="trade_date").apply(self.core, pb=pb, task=task)
+        vol_adj_weights = vol_adj_weights.reset_index().rename(columns={0: "weight"})
         tot_wgt = self.load_tot_wgt(bgn_date, stp_date)
-        weights = adjust_weights(raw_weights, tot_wgt)
+        weights = adjust_weights(vol_adj_weights, tot_wgt)
         self.save(weights, calendar)
         return 0
 
@@ -298,14 +314,12 @@ def gen_signals_from_factors(
         factor_cfgs: list[CCfgFactorGrp],
         factors_avlb_dir: str,
         signals_factors_dir: str,
-        icov_data: pd.DataFrame,
 ) -> list[CSignalsFactors]:
     return [
         CSignalsFactors(
             factor_grp=z,
             factors_avlb_dir=factors_avlb_dir,
             signals_factors_dir=signals_factors_dir,
-            icov_data=icov_data,
         )
         for z in factor_cfgs
     ]
@@ -317,6 +331,7 @@ def gen_signals_from_strategies(
         signals_strategies_dir: str,
         signals_factors_dir: str,
         optimize_dir: str,
+        icov_data: pd.DataFrame,
         db_struct_css: CDbStruct,
 ) -> list[CSignalsStrategy]:
     return [
@@ -325,6 +340,7 @@ def gen_signals_from_strategies(
             signals_strategies_dir=signals_strategies_dir,
             signals_factors_dir=signals_factors_dir,
             optimize_dir=optimize_dir,
+            icov_data=icov_data,
             db_struct_css=db_struct_css,
         )
         for z in strategies

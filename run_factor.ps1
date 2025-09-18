@@ -3,7 +3,8 @@ param (
     [string]$bgn_date_factor,
     [string]$bgn_date_qtest,
     [string]$stp_date,
-    [string]$factor
+    [string]$factor,
+    [Switch]$DisableMP
 )
 
 $proj_dir = "E:\Data\Projects\CTA_V6"
@@ -30,7 +31,17 @@ Remove-Item "$proj_dir\ot_tests\data\$factor-*.db"
 Remove-Item "$proj_dir\ot_tests\plots\$factor-*.pdf"
 Remove-Item "$proj_dir\ot_tests\\$factor-*.csv"
 
-python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass $factor
-python main.py --bgn $bgn_date_qtest --stp $stp_date ic --fclass $factor
-python main.py --bgn $bgn_date_qtest --stp $stp_date vt --fclass $factor
-python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass $factor
+if ($DisableMP)
+{
+    python main.py --bgn $bgn_date_factor --stp $stp_date --nomp factor --fclass $factor
+    python main.py --bgn $bgn_date_qtest --stp $stp_date --nomp ic --fclass $factor
+    python main.py --bgn $bgn_date_qtest --stp $stp_date --nomp vt --fclass $factor
+    python main.py --bgn $bgn_date_qtest --stp $stp_date --nomp ot --fclass $factor
+}
+else
+{
+    python main.py --bgn $bgn_date_factor --stp $stp_date factor --fclass $factor
+    python main.py --bgn $bgn_date_qtest --stp $stp_date ic --fclass $factor
+    python main.py --bgn $bgn_date_qtest --stp $stp_date vt --fclass $factor
+    python main.py --bgn $bgn_date_qtest --stp $stp_date ot --fclass $factor
+}

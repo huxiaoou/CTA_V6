@@ -36,7 +36,7 @@ class CFactorIDV(CFactorsByInstru):
             mu = major_data["vol"].rolling(window=win).mean()
             sd = major_data["vol"].rolling(window=win).std()
             major_data[name_vanilla] = -((major_data["vol"] - mu) / sd.where(sd > 0, np.nan)).fillna(0)
-        n0, n1 = self.cfg.name_vanilla(55), self.cfg.name_vanilla(8)
+        n0, n1 = self.cfg.name_vanilla(60), self.cfg.name_vanilla(10)
         major_data[self.cfg.name_diff()] = major_data[n0] - major_data[n1]
         major_data = major_data.reset_index()
         self.rename_ticker(major_data)

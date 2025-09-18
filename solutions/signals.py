@@ -236,15 +236,16 @@ class CSignalsStrategy(CSignals):
         k = len(data)
         factor_data = data[[weight, "instrument"]].sort_values(by=weight, ascending=False)
         w0 = factor_data["weight"].to_numpy()
-        k0 = k // 2
+        k0 = len(w0[w0 >= 0])
+        k1 = k - k0
         top_list = factor_data["instrument"].head(k0).tolist()
-        btm_list = factor_data["instrument"].tail(k0).tolist()
+        btm_list = factor_data["instrument"].tail(k1).tolist()
         cov_top = covariance.loc[top_list, top_list]
         cov_btm = covariance.loc[btm_list, btm_list]
-        w_top, w_btm = w0[0:k0], w0[-k0:]
+        w_top, w_btm = w0[0:k0], w0[-k1:]
         var_top, var_btm = w_top @ cov_top @ w_top, w_btm @ cov_btm @ w_btm
         top_btm_ratio = np.sqrt(var_top / var_btm)
-        w0[-k0:] = w0[-k0:] * top_btm_ratio
+        w0[-k1:] = w0[-k1:] * top_btm_ratio
         w0 = w0 / np.sum(np.abs(w0))
         res = pd.Series(data=w0, index=factor_data["instrument"]).sort_index()
         pb.update(task_id=task, advance=1)

@@ -197,25 +197,13 @@ factors:
   BASIS:
     args:
       wins: [ 10, 20, 60, 120, 240 ]
-  TS:
-    args:
-      wins: [ 10, 20, 60, 120, 240 ]
   RS:
     args:
       wins: [ 20, 60, 120, 240 ]
-  MTM:
-    args:
-      wins: [ 1, 2, 3, 5, 10, 20, 120, 240 ]
-  SKEW:
-    args:
-      wins: [ 10, 20, 60, 120 ]
   KURT:
     args:
       wins: [ 5, 10, 20, 60, 120, 240 ]
   LIQUIDITY:
-    args:
-      wins: [ 10, 20, 60, 120, 240 ]
-  SIZE:
     args:
       wins: [ 10, 20, 60, 120, 240 ]
   CTP:
@@ -226,94 +214,15 @@ factors:
     args:
       wins: [ 60, 120, 180 ]
       lbds: [ 0.5, 0.95 ]
-  CTR:
-    args:
-      wins: [ 30, 60, 120 ]
-      lbds: [ 0.3, 0.5 ]
-  SPDWEB:
-    args:
-      wins: [ 3, 5, 10, 20 ]
-      lbds: [ 0.2, 0.5, 0.8 ]
-  MPH:
-    args:
-      wins: [ 60, 120, 180 ]
-      lbds: [ 0.80, 1.00 ]
-  S0BETA:
-    args:
-      wins: [ 20, 60, 120 ]
-  S1BETA:
-    args:
-      wins: [ 20, 60, 120 ]
   VAL:
     args:
       wins: [ 10, 20, 60, 120, 240 ]
-  ACR:
-    args:
-      wins: [ 5, 8, 13, 21, 60, 120 ]
-  REOC:
-    args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
   NPLS:
-    args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
-  ONR:
-    args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
-  ONR2:
-    args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
-  IDR:
     args:
       wins: [ 3, 5, 10, 20, 60, 120, 240 ]
   IKURT:
     args:
       wins: [ 3, 5, 10, 20, 60, 120, 240 ]
-  VENTROPY:
-    args:
-      wins: [ 1, 3, 5, 10, 20, 60 ]
-  AMP:
-    args:
-      wins: [ 5, 20, 60, 120, 240 ]
-      lbds: [ 0.2, 0.3, 0.5 ]
-  LCVR:
-    args:
-      wins: [ 5, 20, 60, 120, 240 ]
-  #  LCRV:
-  #    args:
-  #      wins: [ 3, 5, 20, 60, 120, 240 ]
-  #  SMT:
-  #    args:
-  #      wins: [ 3, 5 ]
-  #      lbds: [ 0.2, 0.5, 0.8 ]
-  #  MF:
-  #    args:
-  #      wins: [ 1, 3, 5, 10 ]
-  #  JUMP:
-  #    args:
-  #      wins: [ 1, 3, 5, 10 ]
-  #  IDV:
-  #    args:
-  #      wins: [ 5, 8, 13, 21, 34, 55 ]
-  #  CNVG:
-  #    args:
-  #      wins: [ 5, 10, 20, 60, 120, 240 ]
-  #  WSPLIT:
-  #    args:
-  #      wins: [ 1, 3, 5 ]
-  #      lbds: [ 0.1, 0.2, 0.4 ]
-  #  MPC:
-  #    args:
-  #      wins: [ 60, 120, 180 ]
-  #      lbds: [ 0.80, 1.00 ]
-  #  ISKEW:
-  #    args:
-  #      wins: [ 10, 20, 60, 120, 240 ]
-  #  IKURT:
-  #    args:
-  #      wins: [ 10, 20, 60, 120, 240 ]
-  #  OMA:
-  #    args:
-  #      wins: [ 1, 5, 10, 20, 60, 120, 240 ]
 
 # ------- strategies -------
 strategies:
@@ -330,15 +239,6 @@ strategies:
       - [ CTP, CTP060L95 ]
       - [ CVP, CVP060L95 ]
       - [ IKURT, IKURT240 ]
-    #      - [ MTM, MTMDIF ]
-    #      - [ SKEW, SKEW060 ]
-    #      - [ SIZE, SIZEDIF ]
-    #      - [ MPH, MPH060L80 ]
-    #      - [ ACR, ACRDIF ]
-    #      - [ REOC, REOCDIF ]
-    #      - [ VENTROPY, VENTROPY005 ]
-    #      - [ AMP, AMPDIF ]
-    #      - [ LCVR, LCVR020 ]
   - name: s1
     opt_win: 240
     ret: Cls005L1
@@ -352,15 +252,6 @@ strategies:
       - [ CTP, CTP060L95 ]
       - [ CVP, CVP060L95 ]
       - [ IKURT, IKURT240 ]
-    #      - [ MTM, MTMDIF ]
-    #      - [ SKEW, SKEW060 ]
-    #      - [ SIZE, SIZEDIF ]
-    #      - [ MPH, MPH060L80 ]
-    #      - [ ACR, ACRDIF ]
-    #      - [ REOC, REOCDIF ]
-    #      - [ VENTROPY, VENTROPY005 ]
-    #      - [ AMP, AMPDIF ]
-    #      - [ LCVR, LCVR020 ]
 
 # ------- models -------
 portfolios:

@@ -16,23 +16,14 @@ python main.py --bgn $bgn_date_avlb --stp $stp_date icov
 python main.py --bgn $bgn_date_avlb --stp $stp_date test_return
 
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date BASIS
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date TS
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date RS
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date MTM
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date SKEW
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date KURT
+.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date IKURT
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date LIQUIDITY
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date SIZE
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date CTP
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date CVP
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date MPH
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date VAL
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date ACR
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date REOC
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date NPLS
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date VENTROPY
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date AMP
-.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date LCVR
 
 python main.py --bgn $bgn_date_sig_fac --stp $stp_date signals --type factors
 python main.py --bgn $bgn_date_opt --stp $stp_date optimize

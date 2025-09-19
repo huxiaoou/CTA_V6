@@ -1,12 +1,16 @@
 import pandas as pd
 from husfort.qcalendar import CCalendar
-from typedefs.typedefFactors import CCfgFactorGrpWinLbd
+from typedefs.typedefFactors import CCfgFactorGrpWinLbd, TFactorNames
 from solutions.factor import CFactorsByInstru
 
 
 class CCfgFactorGrpSPDWEB(CCfgFactorGrpWinLbd):
     def __init__(self, **kwargs):
         super().__init__(factor_class="SPDWEB", **kwargs)
+
+    @property
+    def factor_names(self) -> TFactorNames:
+        return self.names_vanilla + self.names_diff
 
 
 class CFactorSPDWEB(CFactorsByInstru):
@@ -59,6 +63,8 @@ class CFactorSPDWEB(CFactorsByInstru):
                 name_vanilla = self.cfg.name_vanilla(win, lbd)
                 res_df[name_vanilla] = res_df[name_lbd].rolling(window=win).mean()
         adj_data = pd.merge(left=adj_data, right=res_df, on="trade_date", how="left")
+        na, nb = self.cfg.name_vanilla(win=20, lbd=0.9), self.cfg.name_vanilla(win=240, lbd=0.6)
+        adj_data[self.cfg.name_diff()] = adj_data[na] - adj_data[nb]
         self.rename_ticker(adj_data)
         factor_data = self.get_factor_data(adj_data, bgn_date)
         return factor_data

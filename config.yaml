@@ -230,7 +230,7 @@ factors:
 # ------- strategies -------
 strategies:
   - name: s0
-    opt_win: 120
+    opt_win: 240
     ret: Opn005L1
     factors:
       - [ BASIS, BASIS060 ]
@@ -244,7 +244,7 @@ strategies:
       - [ IKURT, IKURT240 ]
       - [ TR, TRDIF ]
   - name: s1
-    opt_win: 120
+    opt_win: 240
     ret: Cls005L1
     factors:
       - [ BASIS, BASIS060 ]

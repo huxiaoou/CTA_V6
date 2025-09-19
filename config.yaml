@@ -242,6 +242,7 @@ strategies:
       - [ CTP, CTP060L95 ]
       - [ CVP, CVP060L95 ]
       - [ IKURT, IKURT240 ]
+      - [ TR, TRDIF ]
   - name: s1
     opt_win: 240
     ret: Cls005L1
@@ -255,6 +256,7 @@ strategies:
       - [ CTP, CTP060L95 ]
       - [ CVP, CVP060L95 ]
       - [ IKURT, IKURT240 ]
+      - [ TR, TRDIF ]
 
 # ------- models -------
 portfolios:

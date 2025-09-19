@@ -25,7 +25,7 @@ class CFactorMF(CFactorsByInstru):
     def cal_mf(tday_minb_data: pd.DataFrame, money: str = "amount", ret: str = "freq_ret") -> float:
         wgt = tday_minb_data[money] / tday_minb_data[money].sum()
         sgn = tday_minb_data[ret].fillna(0)
-        mf = -wgt @ sgn
+        mf = wgt @ sgn
         return mf
 
     def cal_factor_by_instru(self, instru: str, bgn_date: str, stp_date: str, calendar: CCalendar) -> pd.DataFrame:
@@ -45,7 +45,8 @@ class CFactorMF(CFactorsByInstru):
         )
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
             input_data[name_vanilla] = input_data["mf"].rolling(window=win).mean()
-        n0, n1 = self.cfg.name_vanilla(1), self.cfg.name_vanilla(5)
+        w0, w1 = 240, 60
+        n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         input_data[self.cfg.name_diff()] = input_data[n0] - input_data[n1]
         self.rename_ticker(input_data)
         factor_data = self.get_factor_data(input_data, bgn_date=bgn_date)

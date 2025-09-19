@@ -24,6 +24,7 @@ python main.py --bgn $bgn_date_avlb --stp $stp_date test_return
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date CVP
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date VAL
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date NPLS
+.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date TR
 
 python main.py --bgn $bgn_date_sig_fac --stp $stp_date signals --type factors
 python main.py --bgn $bgn_date_opt --stp $stp_date optimize

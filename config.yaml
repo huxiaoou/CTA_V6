@@ -223,6 +223,9 @@ factors:
   IKURT:
     args:
       wins: [ 3, 5, 10, 20, 60, 120, 240 ]
+  TR:
+    args:
+      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
 
 # ------- strategies -------
 strategies:

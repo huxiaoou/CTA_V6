@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import multiprocessing as mp
 from typing import Final
-from rich.progress import Progress, track, TaskID, TimeElapsedColumn, TimeRemainingColumn, TextColumn, BarColumn
+from rich.progress import Progress, TaskID, TimeElapsedColumn, TimeRemainingColumn, TextColumn, BarColumn
 from husfort.qsqlite import CMgrSqlDb, CDbStruct
 from husfort.qcalendar import CCalendar
 from husfort.qutility import check_and_makedirs, error_handler
+from husfort.qlog import logger
 from typedefs.typedefFactors import CCfgFactorGrp, CFactor
 from typedefs.typedefStrategies import CStrategy
 from solutions.factor import CFactorsLoader
@@ -288,25 +289,23 @@ def main_signals(
         desc: str,
 ):
     if call_multiprocess:
-        with Progress() as pb:
-            main_task = pb.add_task(description=desc, total=len(signals))
-            with mp.get_context("spawn").Pool(processes=processes) as pool:
-                for s in signals:
-                    pool.apply_async(
-                        s.main,
-                        kwds={
-                            "bgn_date": bgn_date,
-                            "stp_date": stp_date,
-                            "calendar": calendar,
-                        },
-                        callback=lambda _: pb.update(task_id=main_task, advance=1),
-                        error_callback=error_handler,
-                    )
-                pool.close()
-                pool.join()
+        with mp.get_context("spawn").Pool(processes=processes) as pool:
+            for s in signals:
+                pool.apply_async(
+                    s.main,
+                    kwds={
+                        "bgn_date": bgn_date,
+                        "stp_date": stp_date,
+                        "calendar": calendar,
+                    },
+                    error_callback=error_handler,
+                )
+            pool.close()
+            pool.join()
     else:
-        for s in track(signals, description=desc):
+        for s in signals:
             s.main(bgn_date, stp_date, calendar)
+    logger.info(f"Task {desc} accomplished.")
     return 0
 
 

@@ -196,36 +196,36 @@ factor_decay_default:
 factors:
   BASIS:
     args:
-      wins: [ 10, 20, 60, 120, 240 ]
+      wins: [ 60, 240 ]
   RS:
     args:
-      wins: [ 20, 60, 120, 240 ]
+      wins: [ 240, 20 ]
   KURT:
     args:
-      wins: [ 5, 10, 20, 60, 120, 240 ]
+      wins: [ 60, 10 ]
   LIQUIDITY:
     args:
-      wins: [ 10, 20, 60, 120, 240 ]
+      wins: [ 240, 10 ]
   CTP:
     args:
-      wins: [ 60, 120, 180 ]
-      lbds: [ 0.5, 0.95 ]
+      wins: [ 60 ]
+      lbds: [ 0.95 ]
   CVP:
     args:
-      wins: [ 60, 120, 180 ]
-      lbds: [ 0.5, 0.95 ]
+      wins: [ 60 ]
+      lbds: [ 0.95 ]
   VAL:
     args:
-      wins: [ 10, 20, 60, 120, 240 ]
+      wins: [ 240, 60 ]
   NPLS:
     args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
+      wins: [ 240, 3 ]
   IKURT:
     args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
+      wins: [ 240, 20 ]
   TR:
     args:
-      wins: [ 3, 5, 10, 20, 60, 120, 240 ]
+      wins: [ 240, 60 ]
 
 # ------- strategies -------
 strategies:

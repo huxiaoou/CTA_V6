@@ -36,7 +36,8 @@ class CFactorRS(CFactorsByInstru):
             la = adj_data["stock"].shift(win)
             s = adj_data["stock"] / la.where(la > 0, np.nan)
             adj_data[rsla] = 1 - s
-        n0, n1 = self.cfg.name_pa(240), self.cfg.name_pa(20)
+        w0, w1 = self.cfg.args.wins
+        n0, n1 = self.cfg.name_pa(w0), self.cfg.name_pa(w1)
         adj_data[self.cfg.name_diff()] = adj_data[n0] - adj_data[n1]
         self.rename_ticker(adj_data)
         factor_data = self.get_factor_data(adj_data, bgn_date)

@@ -49,7 +49,7 @@ class CFactorNPLS(CFactorsByInstru):
         maj_data["npls"] = robust_div(maj_data["net_pos_chg"], maj_data["aver_oi"], nan_val=0)
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
             maj_data[name_vanilla] = maj_data["npls"].rolling(win).sum()
-        w0, w1 = 240, 3
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         maj_data[self.cfg.name_diff()] = maj_data[n0] * np.sqrt(w1 / w0) - maj_data[n1]
         maj_data = maj_data.reset_index()

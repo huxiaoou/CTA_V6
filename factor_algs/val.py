@@ -40,7 +40,7 @@ class CFactorVAL(CFactorsByInstru):
                 y=major_data[self.val_var].rolling(win).mean(),
                 scale=100,
             )
-        w0, w1 = 240, 60
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         major_data[self.cfg.name_diff()] = major_data[n0] * np.sqrt(w1 / w0) - major_data[n1]
         self.rename_ticker(major_data)

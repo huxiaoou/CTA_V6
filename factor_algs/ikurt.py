@@ -38,7 +38,7 @@ class CFactorIKURT(CFactorsByInstru):
         ikurt = minb_data.groupby(by="trade_date")["simple"].apply(lambda z: z.kurt())
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
             maj_data[name_vanilla] = -ikurt.rolling(win).sum()
-        w0, w1 = 240, 20
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         maj_data[self.cfg.name_diff()] = maj_data[n0] * np.sqrt(w1 / w0) - maj_data[n1]
         maj_data = maj_data.reset_index()

@@ -31,7 +31,7 @@ class CFactorLIQUIDITY(CFactorsByInstru):
         major_data[liquidity_id] = major_data["return_c_major"] * 1e10 / major_data["amount_major"]
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
             major_data[name_vanilla] = major_data[liquidity_id].rolling(window=win, min_periods=int(win * 0.3)).mean()
-        w0, w1 = 240, 10
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         major_data[self.cfg.name_diff()] = major_data[n0] * np.sqrt(w0/w1) - major_data[n1]
         self.rename_ticker(major_data)

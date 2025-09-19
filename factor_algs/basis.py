@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from husfort.qcalendar import CCalendar
 from typedefs.typedefFactors import CCfgFactorGrpWin, TFactorNames, TFactorName
@@ -40,13 +41,13 @@ class CFactorBASIS(CFactorsByInstru):
             beta = cal_rolling_beta(df=adj_data, x=x, y=y, rolling_window=win)
             adj_data[name_res] = adj_data[y] - adj_data[x] * beta
 
-        w0, w1 = 120, 10
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
-        adj_data[self.cfg.name_diff()] = adj_data[n0] - adj_data[n1]
+        adj_data[self.cfg.name_diff()] = adj_data[n0] * np.sqrt(w0 / w1) - adj_data[n1]
 
-        w0, w1 = 10, 240
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_res(w0), self.cfg.name_res(w1)
-        adj_data[self.cfg.name_diff2()] = adj_data[n0] - adj_data[n1]
+        adj_data[self.cfg.name_diff2()] = adj_data[n0] * np.sqrt(w0 / w1) - adj_data[n1]
 
         self.rename_ticker(adj_data)
         factor_data = self.get_factor_data(adj_data, bgn_date)

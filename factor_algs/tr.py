@@ -38,7 +38,7 @@ class CFactorTR(CFactorsByInstru):
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
             adj_data[name_vanilla] = adj_data["ret_adj"].rolling(window=win, min_periods=int(2 * win / 3)).sum()
 
-        wa, wb = 240, 60
+        wa, wb = self.cfg.args.wins
         na, nb = self.cfg.name_vanilla(wa), self.cfg.name_vanilla(wb)
         adj_data[self.cfg.name_diff()] = adj_data[na] * np.sqrt(wb / wa) - adj_data[nb]
         self.rename_ticker(adj_data)

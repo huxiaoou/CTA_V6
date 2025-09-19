@@ -28,7 +28,7 @@ class CFactorKURT(CFactorsByInstru):
         )
         for win, name_vanilla in zip(self.cfg.args.wins, self.cfg.names_vanilla):
             major_data[name_vanilla] = -major_data["return_c_major"].rolling(window=win).kurt()
-        w0, w1 = 60, 10
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         major_data[self.cfg.name_diff()] = major_data[n0] - major_data[n1]
         self.rename_ticker(major_data)

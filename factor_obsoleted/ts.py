@@ -51,8 +51,9 @@ class CFactorTS(CFactorsByInstru):
             adj_data[name_vanilla] = adj_data["ts"].rolling(window=win, min_periods=int(2 * win / 3)).mean()
             beta = cal_rolling_beta(df=adj_data, x=x, y=y, rolling_window=win)
             adj_data[name_res] = -(adj_data[y] - adj_data[x] * beta)
-        n0, n1 = self.cfg.name_vanilla(120), self.cfg.name_res(60)
-        adj_data[self.cfg.name_diff()] = adj_data[n0] + 500 * adj_data[n1]
+        w0, w1 = 240, 20
+        n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
+        adj_data[self.cfg.name_diff()] = adj_data[n0] * np.power(w0 / w1, 0.8) - adj_data[n1]
         self.rename_ticker(adj_data)
         factor_data = self.get_factor_data(adj_data, bgn_date)
         return factor_data

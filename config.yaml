@@ -197,6 +197,9 @@ factors:
   BASIS:
     args:
       wins: [ 60, 240 ]
+  MINOR:
+    args:
+      wins: [ 10, 20, 60, 120, 240 ]
   RS:
     args:
       wins: [ 240, 20 ]
@@ -234,6 +237,7 @@ strategies:
     ret: Opn005L1
     factors:
       - [ BASIS, BASIS060 ]
+      - [ MINOR, MINORDIF ]
       - [ RS, RSDIF ]
       - [ VAL, VALDIF ]
       - [ KURT, KURTDIF ]
@@ -248,6 +252,7 @@ strategies:
     ret: Cls005L1
     factors:
       - [ BASIS, BASIS060 ]
+      - [ MINOR, MINORDIF ]
       - [ RS, RSDIF ]
       - [ VAL, VALDIF ]
       - [ KURT, KURTDIF ]

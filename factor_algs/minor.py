@@ -33,7 +33,7 @@ class CFactorMINOR(CFactorsByInstru):
             major_avg = adj_data[major].rolling(window=win, min_periods=int(2 * win / 3)).mean()
             adj_data[name_vanilla] = minor_avg
             adj_data[name_res] = major_avg - minor_avg
-        w0, w1 = 240, 60
+        w0, w1 = self.cfg.args.wins
         n0, n1 = self.cfg.name_vanilla(w0), self.cfg.name_vanilla(w1)
         adj_data[self.cfg.name_diff()] = adj_data[n0] * np.power(w0 / w1, 0.5) - adj_data[n1]
         self.rename_ticker(adj_data)

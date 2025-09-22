@@ -16,6 +16,7 @@ python main.py --bgn $bgn_date_avlb --stp $stp_date icov
 python main.py --bgn $bgn_date_avlb --stp $stp_date test_return
 
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date BASIS
+.\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date MINOR
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date RS
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date KURT
 .\run_factor.ps1 $bgn_date_factor $bgn_date_qtest $stp_date IKURT

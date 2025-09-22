@@ -237,7 +237,7 @@ strategies:
     ret: Opn005L1
     factors:
       - [ BASIS, BASIS060 ]
-      - [ MINOR, MINORDIF ]
+      - [ MINOR, MINOR240RES ]
       - [ RS, RSDIF ]
       - [ VAL, VALDIF ]
       - [ KURT, KURTDIF ]
@@ -252,7 +252,7 @@ strategies:
     ret: Cls005L1
     factors:
       - [ BASIS, BASIS060 ]
-      - [ MINOR, MINORDIF ]
+      - [ MINOR, MINOR240RES ]
       - [ RS, RSDIF ]
       - [ VAL, VALDIF ]
       - [ KURT, KURTDIF ]

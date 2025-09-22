@@ -119,7 +119,7 @@ class CSignalsFactors(CSignals):
             task = pb.add_task(description=self.signal_id)
             pb.update(task_id=task, completed=0, total=len(factor_data["trade_date"].unique()))
             weight_data = factor_data.groupby(by="trade_date").apply(  # type:ignore
-                self.core, rate=0.25, pb=pb, task=task,
+                self.core, rate=0.50, pb=pb, task=task,
             )
         weight_data = weight_data.reset_index()
         save_data = pd.merge(

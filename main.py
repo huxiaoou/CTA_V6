@@ -169,7 +169,6 @@ if __name__ == "__main__":
             icov_db_dir=proj_cfg.instru_covar_dir,
         )
         icov.main(bgn_date=bgn_date, stp_date=stp_date, calendar=calendar)
-
     elif args.switch == "test_return":
         from solutions.test_return import CTestReturnsByInstru, CTestReturnsAvlb
 
@@ -286,7 +285,6 @@ if __name__ == "__main__":
             processes=args.processes,
             desc=desc,
         )
-
     elif args.switch == "optimize":
         from solutions.optimize import main_optimize
 
@@ -299,7 +297,6 @@ if __name__ == "__main__":
             optimize_dir=proj_cfg.optimize_dir,
             vt_tests_dir=proj_cfg.vt_tests_dir,
         )
-
     elif args.switch == "simulations":
         from solutions.simulations import main_sims
         from solutions.evaluations import main_evl_strategies_and_portfolios
@@ -366,6 +363,5 @@ if __name__ == "__main__":
             bgn_date=bgn_date, stp_date=stp_date,
             factors_corr_dir=proj_cfg.factors_corr_dir,
         )
-
     elif args.switch == "test":
         logger.info("Do some tests")

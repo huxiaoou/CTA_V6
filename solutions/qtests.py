@@ -265,7 +265,7 @@ class CVTTest(__CQTest):
     def core(
             self, data: pd.DataFrame, volatility: str = "volatility", pb: Progress = None, task: TaskID = None,
     ) -> pd.Series:
-        wgt = gen_exp_wgt(k=len(data), rate=0.50)
+        wgt = gen_exp_wgt(k=len(data), rate=0.20)
         s = {}
         if self.volatility_adjusted:
             data[volatility] = data[volatility].fillna(data[volatility].median())
